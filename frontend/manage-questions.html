@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Questions</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7fc;
+            color: #333;
+        }
+
+        header {
+            background: #1746a2;
+            color: white;
+            padding: 20px 5%;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 25px;
+        }
+
+        .container, .question-card {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 9px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        }
+
+        h2 {
+            color: #1746a2;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 11px;
+            margin-top: 7px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background: #1746a2;
+            color: white;
+            border: none;
+            padding: 11px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .back-btn {
+            background: #555;
+        }
+
+        #message {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2 style="color:white;">Smart Exam Monitoring System</h2>
+</header>
+
+<main>
+
+    <div class="container">
+        <h2>Manage Examination Questions</h2>
+
+        <label>Select Examination</label>
+        <select id="examSelect" required>
+            <option value="">Select an examination</option>
+        </select>
+
+        <form id="questionForm">
+
+            <label>Enter Question</label>
+            <input type="text" id="question" required>
+
+            <label>Option A</label>
+            <input type="text" id="optionA" required>
+
+            <label>Option B</label>
+            <input type="text" id="optionB" required>
+
+            <label>Option C</label>
+            <input type="text" id="optionC" required>
+
+            <label>Option D</label>
+            <input type="text" id="optionD" required>
+
+            <label>Correct Answer</label>
+            <select id="correctAnswer" required>
+                <option value="">Select correct answer</option>
+                <option value="A">Option A</option>
+                <option value="B">Option B</option>
+                <option value="C">Option C</option>
+                <option value="D">Option D</option>
+            </select>
+
+            <button type="submit">Save Question</button>
+
+        </form>
+
+        <p id="message"></p>
+    </div>
+
+    <div class="container">
+        <h2>Saved Questions</h2>
+        <div id="questionList">
+            Select an examination to view its questions.
+        </div>
+    </div>
+
+    <button class="back-btn"
+        onclick="window.location.href='examiner.html'">
+        Back to Dashboard
+    </button>
+
+</main>
+
+<script>
+    const examSelect = document.getElementById("examSelect");
+    const questionForm = document.getElementById("questionForm");
+    const questionList = document.getElementById("questionList");
+    const message = document.getElementById("message");
+
+    function getExams() {
+        return JSON.parse(
+            localStorage.getItem("examinations") || "[]"
+        );
+    }
+
+    function displayExams() {
+        const exams = getExams();
+
+        exams.forEach((exam, index) => {
+            const option = document.createElement("option");
+            option.value = index;
+            option.textContent = exam.examName + " - " + exam.subject;
+            examSelect.appendChild(option);
+        });
+    }
+
+    function displayQuestions() {
+        const exams = getExams();
+        const index = examSelect.value;
+
+        questionList.innerHTML = "";
+
+        if (index === "") {
+            questionList.textContent =
+                "Select an examination to view its questions.";
+            return;
+        }
+
+        const questions = exams[Number(index)].questions || [];
+
+        if (questions.length === 0) {
+            questionList.textContent = "No questions added yet.";
+            return;
+        }
+
+        questions.forEach((q, i) => {
+            const card = document.createElement("div");
+            card.className = "question-card";
+
+            const heading = document.createElement("h3");
+            heading.textContent = (i + 1) + ". " + q.question;
+            card.appendChild(heading);
+
+            ["A", "B", "C", "D"].forEach(letter => {
+                const p = document.createElement("p");
+                p.textContent = letter + ". " + q["option" + letter];
+                card.appendChild(p);
+            });
+
+            const answer = document.createElement("p");
+            answer.textContent = "Correct Answer: Option " + q.correctAnswer;
+            answer.style.color = "green";
+            card.appendChild(answer);
+
+            questionList.appendChild(card);
+        });
+    }
+
+    examSelect.addEventListener("change", function() {
+        message.textContent = "";
+        displayQuestions();
+    });
+
+    questionForm.addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        const index = examSelect.value;
+
+        if (index === "") {
+            alert("Please select an examination first.");
+            return;
+        }
+
+        const exams = getExams();
+        const selectedExam = exams[Number(index)];
+
+        if (!selectedExam) {
+            alert("Examination not found. Please refresh the page.");
+            return;
+        }
+
+        const question = {
+            question: document.getElementById("question").value.trim(),
+            optionA: document.getElementById("optionA").value.trim(),
+            optionB: document.getElementById("optionB").value.trim(),
+            optionC: document.getElementById("optionC").value.trim(),
+            optionD: document.getElementById("optionD").value.trim(),
+            correctAnswer: document.getElementById("correctAnswer").value
+        };
+
+        if (Object.values(question).some(value => !value)) {
+            alert("Please fill in all question details.");
+            return;
+        }
+
+        if (!selectedExam.questions) {
+            selectedExam.questions = [];
+        }
+
+        selectedExam.questions.push(question);
+
+        localStorage.setItem(
+            "examinations",
+            JSON.stringify(exams)
+        );
+
+        questionForm.reset();
+        message.textContent = "Question saved successfully!";
+
+        displayQuestions();
+    });
+
+    displayExams();
+</script>
+
+</body>
+</html>

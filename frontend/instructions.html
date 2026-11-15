@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Instructions</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f1f5fb;
+            color: #1e293b;
+        }
+
+        header {
+            background: #1e3a8a;
+            color: white;
+            padding: 22px 7%;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            color: #1e3a8a;
+            margin-bottom: 15px;
+        }
+
+        .exam-info {
+            background: #eff6ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .exam-info p {
+            margin: 10px 0;
+        }
+
+        h2 {
+            color: #1e3a8a;
+            margin: 25px 0 15px;
+        }
+
+        ul {
+            padding-left: 25px;
+        }
+
+        li {
+            margin-bottom: 14px;
+            line-height: 1.5;
+        }
+
+        .notice {
+            background: #fff7ed;
+            border-left: 5px solid #f59e0b;
+            padding: 15px;
+            margin: 25px 0;
+            line-height: 1.6;
+        }
+
+        .agreement {
+            margin: 25px 0;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            line-height: 1.5;
+        }
+
+        .agreement input {
+            margin-top: 4px;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            padding: 13px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #1e40af;
+        }
+
+        button:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .back {
+            background: #64748b;
+            margin-right: 10px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #64748b;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>Smart Exam Monitoring</h2>
+</header>
+
+<div class="container">
+
+    <h1>Examination Instructions</h1>
+
+    <p>Please read all instructions carefully before starting your examination.</p>
+
+    <div class="exam-info">
+        <h2>Examination Details</h2>
+
+        <p><strong>Exam Name:</strong> Computer Science Examination</p>
+
+        <p><strong>Duration:</strong> 60 Minutes</p>
+
+        <p><strong>Total Questions:</strong> 30</p>
+
+        <p><strong>Exam Type:</strong> Online Examination</p>
+    </div>
+
+    <h2>General Instructions</h2>
+
+    <ul>
+        <li>Read every question carefully before answering.</li>
+
+        <li>Do not refresh or close the examination browser window.</li>
+
+        <li>Ensure that your internet connection is stable.</li>
+
+        <li>Complete the examination within the given time.</li>
+
+        <li>Do not switch tabs or windows during the examination.</li>
+
+        <li>Submit your answers before the examination timer ends.</li>
+
+        <li>Do not use mobile phones or other unauthorized devices.</li>
+    </ul>
+
+    <h2>Webcam Monitoring Instructions</h2>
+
+    <ul>
+        <li>Keep your face clearly visible to the webcam.</li>
+
+        <li>Sit in a well-lit and quiet environment.</li>
+
+        <li>Allow webcam permission when requested by the browser.</li>
+
+        <li>Follow all examination monitoring rules.</li>
+    </ul>
+
+    <div class="notice">
+        <strong>Important Notice:</strong>
+        Your examination may use webcam monitoring and activity
+        tracking. Monitoring will only begin after the required
+        permissions and exam-start process are completed.
+    </div>
+
+    <div class="agreement">
+        <input type="checkbox" id="agree">
+
+        <label for="agree">
+            I have read and understood all examination instructions.
+            I agree to follow the examination rules.
+        </label>
+    </div>
+
+    <button class="back" onclick="goBack()">Back</button>
+
+    <button id="startBtn" onclick="startExam()" disabled>
+        Continue to Exam
+    </button>
+
+</div>
+
+<footer>
+    Smart Exam Monitoring System © 2026
+</footer>
+
+<script>
+
+    const agree = document.getElementById("agree");
+    const startBtn = document.getElementById("startBtn");
+
+    agree.addEventListener("change", function() {
+        startBtn.disabled = !agree.checked;
+    });
+
+    function goBack() {
+        window.location.href = "dashboard.html";
+    }
+
+    function startExam() {
+        if (agree.checked) {
+            window.location.href = "webcam.html";
+        }
+    }
+
+</script>
+
+</body>
+</html>

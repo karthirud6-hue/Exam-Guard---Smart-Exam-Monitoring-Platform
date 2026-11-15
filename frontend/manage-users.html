@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 25px;
+            background: #f4f7fc;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+        }
+
+        h1, h2 {
+            color: #1746a2;
+        }
+
+        input, button {
+            padding: 11px;
+            margin: 6px 4px 6px 0;
+            border-radius: 5px;
+        }
+
+        input {
+            border: 1px solid #ccc;
+        }
+
+        button {
+            border: none;
+            background: #1746a2;
+            color: white;
+            cursor: pointer;
+        }
+
+        .delete {
+            background: #d93025;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #1746a2;
+            color: white;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 12px;
+                overflow-x: auto;
+            }
+
+            input {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1 id="pageTitle">Manage Users</h1>
+
+    <p>Add, view and delete user records.</p>
+
+    <h2>Add User</h2>
+
+    <form id="userForm">
+        <input type="text" id="userName"
+            placeholder="Enter full name" required>
+
+        <input type="email" id="userEmail"
+            placeholder="Enter email address" required>
+
+        <button type="submit">Add User</button>
+    </form>
+
+    <h2>User List</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody id="userList"></tbody>
+    </table>
+
+    <br>
+
+    <button onclick="window.location.href='admin.html'">
+        Back to Admin Dashboard
+    </button>
+
+</div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const role = params.get("role") === "examiner"
+        ? "examiner"
+        : "student";
+
+    const storageKey = role + "Users";
+
+    document.getElementById("pageTitle").innerText =
+        role === "student" ? "Manage Students" : "Manage Examiners";
+
+    let users = JSON.parse(
+        localStorage.getItem(storageKey) || "[]"
+    );
+
+    function displayUsers() {
+        const userList = document.getElementById("userList");
+
+        userList.innerHTML = "";
+
+        users.forEach((user, index) => {
+            const row = document.createElement("tr");
+
+            const nameCell = document.createElement("td");
+            nameCell.textContent = user.name;
+
+            const emailCell = document.createElement("td");
+            emailCell.textContent = user.email;
+
+            const actionCell = document.createElement("td");
+            const deleteButton = document.createElement("button");
+
+            deleteButton.textContent = "Delete";
+            deleteButton.className = "delete";
+
+            deleteButton.onclick = function () {
+                if (confirm("Delete this user record?")) {
+                    users.splice(index, 1);
+
+                    localStorage.setItem(
+                        storageKey,
+                        JSON.stringify(users)
+                    );
+
+                    displayUsers();
+                }
+            };
+
+            actionCell.appendChild(deleteButton);
+
+            row.appendChild(nameCell);
+            row.appendChild(emailCell);
+            row.appendChild(actionCell);
+
+            userList.appendChild(row);
+        });
+
+        if (users.length === 0) {
+            userList.innerHTML =
+                '<tr><td colspan="3">No users added yet.</td></tr>';
+        }
+    }
+
+    document.getElementById("userForm").addEventListener(
+        "submit",
+        function(event) {
+            event.preventDefault();
+
+            const name = document.getElementById("userName").value.trim();
+            const email = document.getElementById("userEmail").value.trim();
+
+            users.push({ name: name, email: email });
+
+            localStorage.setItem(
+                storageKey,
+                JSON.stringify(users)
+            );
+
+            this.reset();
+            displayUsers();
+
+            alert("User added successfully!");
+        }
+    );
+
+    displayUsers();
+</script>
+
+</body>
+</html>

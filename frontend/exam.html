@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Examination</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f4f8;
+            margin: 0;
+            color: #26344a;
+        }
+
+        header {
+            background: #171c70;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .timer {
+            background: white;
+            color: #e53935;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 35px auto;
+            padding: 20px;
+        }
+
+        .exam-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px #00000015;
+        }
+        
+        .webcam-box {
+            background: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            text-align: center;
+}
+
+#examCamera {
+    width: 220px;
+    max-width: 100%;
+    border: 3px solid #171c70;
+    border-radius: 10px;
+    background: black;
+}
+
+#cameraStatus {
+    font-weight: bold;
+    color: green;
+}
+
+        .progress {
+            color: #5378c5;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .question {
+            font-size: 21px;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
+
+        .option {
+            display: block;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 12px 0;
+            cursor: pointer;
+        }
+
+        .option:hover {
+            background: #eef3ff;
+        }
+
+        .option input {
+            margin-right: 12px;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 7px;
+            background: #397bc5;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+        }
+
+        .submit-btn {
+            background: #159447;
+        }
+
+        .result {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+        }
+
+        @media(max-width: 600px) {
+            .container {
+                margin: 15px auto;
+                padding: 12px;
+            }
+
+            .exam-card {
+                padding: 18px;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .buttons {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>Smart Exam Monitoring</h2>
+    <div class="timer" id="timer">60:00</div>
+</header>
+
+<div class="container">
+
+    <div class="webcam-box" id="webcamBox">
+        <h3>Live Webcam Monitoring</h3>
+        <video id="examCamera" autoplay playsinline muted></video>
+        <p id="cameraStatus">Connecting to camera...</p>
+        <p id="faceStatus">Face detection is not started yet.</p>
+        <p id="warningDisplay">warnings:0</p>
+    </div>
+
+    <div class="exam-card" id="examCard">
+
+        <h2 id="examTitle">Computer Science Examination</h2>
+<p id="examDetails">Total Questions: 30 | Duration: 60 Minutes</p>
+
+        <hr>
+
+        <div class="progress" id="progress"></div>
+
+        <div class="question" id="question"></div>
+
+        <div id="options"></div>
+
+        <div class="buttons">
+            <button id="prevBtn" onclick="previousQuestion()">
+                Previous
+            </button>
+
+            <button id="nextBtn" onclick="nextQuestion()">
+                Next
+            </button>
+
+            <button class="submit-btn" onclick="submitExam()">
+                Submit Exam
+            </button>
+        </div>
+
+    </div>
+
+    <div class="result" id="result">
+        <h2>Examination Completed!</h2>
+        <h3 id="score"></h3>
+        <p id="percentage"></p>
+        <p id="message"></p>
+        <p id="resultWarnings"></p>
+        <button onclick="window.location.href='dashboard.html'">
+            Back to Dashboard
+        </button>
+    </div>
+
+</div>
+
+<footer>
+    Smart Exam Monitoring System &copy; 2026
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+<script>
+    let cameraStream = null;
+    let warningCount = 0;
+    let isLookingAway = false;
+
+async function startExamCamera() {
+    const status = document.getElementById("cameraStatus");
+    const video = document.getElementById("examCamera");
+
+    try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false
+        });
+
+        video.srcObject = cameraStream;
+        await video.play();
+        const modelsLoaded = await loadExamFaceModels();
+
+        if (modelsLoaded) {
+            detectExamFace();
+        }
+        cameraStream.getVideoTracks()[0].addEventListener("ended", function() {
+    status.innerText = "WARNING: Webcam disconnected!";
+    status.style.color = "red";
+    alert("Warning! Your webcam has been disconnected.");
+});
+        status.innerText = "Webcam is active during the examination.";
+        const cameraTrack = cameraStream.getVideoTracks()[0];
+
+cameraTrack.addEventListener("mute", function() {
+    status.innerText = "WARNING: Camera temporarily interrupted!";
+    status.style.color = "red";
+});
+
+cameraTrack.addEventListener("unmute", function() {
+    status.innerText = "Webcam is active during the examination.";
+    status.style.color = "green";
+});
+
+    } catch (error) {
+        status.innerText = "Camera unavailable. Please allow camera access.";
+        status.style.color = "red";
+        console.error("Camera error:", error);
+    }
+}
+async function loadExamFaceModels() {
+    try {
+        await faceapi.nets.tinyFaceDetector.loadFromUri('./models');
+        await faceapi.nets.faceLandmark68Net.loadFromUri('./models');
+
+        console.log("Exam face detection models loaded!");
+
+        return true;
+
+    } catch (error) {
+        console.error("Face model loading error:", error);
+        document.getElementById("faceStatus").innerText =
+            "Face detection models could not load.";
+
+        return false;
+    }
+}
+
+async function detectExamFace() {
+    const video = document.getElementById("examCamera");
+    const faceStatus = document.getElementById("faceStatus");
+
+    if (!video.videoWidth) {
+        requestAnimationFrame(detectExamFace);
+        return;
+    }
+
+    const detections = await faceapi.detectAllFaces(
+    video,
+    new faceapi.TinyFaceDetectorOptions()
+).withFaceLandmarks();
+
+    if (detections.length === 0) {
+        faceStatus.innerText = "WARNING: No face detected!";
+        faceStatus.style.color = "red";
+    } else if (detections.length === 1) {
+
+        faceStatus.innerText = "One face detected.";
+        faceStatus.style.color = "green";
+        const points = detections[0].landmarks.positions;
+
+const leftEye = (points[36].x + points[39].x) / 2;
+const rightEye = (points[42].x + points[45].x) / 2;
+const nose = points[30].x;
+
+const eyeCenter = (leftEye + rightEye) / 2;
+const eyeDistance = rightEye - leftEye;
+
+if (nose < eyeCenter - eyeDistance * 0.18 ||
+    nose > eyeCenter + eyeDistance * 0.18) {
+
+    if (!isLookingAway) {
+        warningCount++;
+        document.getElementById("warningDisplay").innerText =
+    "Warnings: " + warningCount;
+        isLookingAway = true;
+    }
+
+    faceStatus.innerText = "WARNING: Please look at the screen!";
+    faceStatus.style.color = "red";
+
+} else {
+    isLookingAway = false;
+}
+    } else {
+        faceStatus.innerText = "WARNING: Multiple faces detected!";
+        faceStatus.style.color = "red";
+    }
+
+    requestAnimationFrame(detectExamFace);
+}
+document.addEventListener("visibilitychange", function() {
+
+    if (document.hidden) {
+        alert("WARNING! You have switched away from the examination tab.");
+
+    }
+
+});
+startExamCamera();
+
+const defaultQuestions = [
+
+{
+q: "1. What does CPU stand for?",
+o: ["Central Processing Unit", "Computer Personal Unit", "Central Program Utility", "Control Processing User"],
+a: 0
+},
+
+{
+q: "2. Which language is used for web page structure?",
+o: ["Python", "HTML", "Java", "C++"],
+a: 1
+},
+
+{
+q: "3. Which of the following is an operating system?",
+o: ["MS Word", "Google Chrome", "Windows", "HTML"],
+a: 2
+},
+
+{
+q: "4. What is the brain of a computer?",
+o: ["Monitor", "CPU", "Keyboard", "Mouse"],
+a: 1
+},
+
+{
+q: "5. Which memory is volatile?",
+o: ["ROM", "Hard Disk", "RAM", "DVD"],
+a: 2
+},
+
+{
+q: "6. What does URL stand for?",
+o: ["Uniform Resource Locator", "Universal Record Link", "User Resource Location", "Uniform Reference Link"],
+a: 0
+},
+
+{
+q: "7. Which data structure follows FIFO?",
+o: ["Stack", "Queue", "Tree", "Graph"],
+a: 1
+},
+
+{
+q: "8. Which data structure follows LIFO?",
+o: ["Queue", "Array", "Stack", "Linked List"],
+a: 2
+},
+
+{
+q: "9. Which symbol is used for comments in JavaScript (single line)?",
+o: ["//", "#", "<!--", "**"],
+a: 0
+},
+
+{
+q: "10. Which of these is a programming language?",
+o: ["HTML", "CSS", "Python", "HTTP"],
+a: 2
+},
+
+{
+q: "11. What does SQL stand for?",
+o: ["Structured Query Language", "Simple Question Language", "System Query Link", "Standard Quick Language"],
+a: 0
+},
+
+{
+q: "12. Which device is used to input text?",
+o: ["Monitor", "Keyboard", "Speaker", "Printer"],
+a: 1
+},
+
+{
+q: "13. Which number system uses only 0 and 1?",
+o: ["Decimal", "Octal", "Binary", "Hexadecimal"],
+a: 2
+},
+
+{
+q: "14. Which protocol is used to access web pages?",
+o: ["HTTP", "FTP", "SMTP", "POP3"],
+a: 0
+},
+
+{
+q: "15. What is the full form of RAM?",
+o: ["Read Access Memory", "Random Access Memory", "Run Active Memory", "Remote Access Module"],
+a: 1
+},
+
+{
+q: "16. Which of these is a database management system?",
+o: ["MySQL", "Windows", "Chrome", "Photoshop"],
+a: 0
+},
+
+{
+q: "17. Which tag creates a hyperlink in HTML?",
+o: ["<p>", "<h1>", "<a>", "<br>"],
+a: 2
+},
+
+{
+q: "18. Which CSS property changes text color?",
+o: ["background", "color", "font-size", "margin"],
+a: 1
+},
+
+{
+q: "19. Which operator is used for equality comparison in JavaScript?",
+o: ["=", "===", "+", "*"],
+a: 1
+},
+
+{
+q: "20. What is the extension of a JavaScript file?",
+o: [".html", ".css", ".js", ".java"],
+a: 2
+},
+
+{
+q: "21. Which of these is an output device?",
+o: ["Mouse", "Keyboard", "Scanner", "Monitor"],
+a: 3
+},
+
+{
+q: "22. What does LAN stand for?",
+o: ["Local Area Network", "Large Access Network", "Long Area Node", "Local Active Number"],
+a: 0
+},
+
+{
+q: "23. Which company developed Java?",
+o: ["Microsoft", "Sun Microsystems", "Apple", "IBM"],
+a: 1
+},
+
+{
+q: "24. Which of these is used for version control?",
+o: ["Git", "HTML", "CSS", "Excel"],
+a: 0
+},
+
+{
+q: "25. Which loop executes at least once?",
+o: ["for", "while", "do-while", "foreach"],
+a: 2
+},
+
+{
+q: "26. What does GUI stand for?",
+o: ["General User Internet", "Graphical User Interface", "Global Utility Interface", "Graphic Universal Input"],
+a: 1
+},
+
+{
+q: "27. Which key is commonly used to refresh a webpage?",
+o: ["F1", "F2", "F5", "F12"],
+a: 2
+},
+
+{
+q: "28. Which of these is a cloud storage service?",
+o: ["Google Drive", "Notepad", "Calculator", "Paint"],
+a: 0
+},
+
+{
+q: "29. Which SQL command retrieves data?",
+o: ["INSERT", "DELETE", "SELECT", "UPDATE"],
+a: 2
+},
+
+{
+q: "30. What does WWW stand for?",
+o: ["World Wide Web", "World Web Window", "Wide World Website", "Web World Wide"],
+a: 0
+}
+
+];
+// Get examinations created by the examiner
+const savedExams = JSON.parse(
+    localStorage.getItem("examinations") || "[]"
+);
+
+// Use the latest examination created by the examiner
+const selectedExam = savedExams.length > 0
+    ? savedExams[savedExams.length - 1]
+    : null;
+    // Get examination details entered by the examiner
+const examTitle = selectedExam
+    ? selectedExam.examName
+    : "Computer Science Examination";
+
+const examDuration = selectedExam
+    ? Number(selectedExam.duration)
+    : 60;
+
+const examTotalQuestions = selectedExam
+    ? Number(selectedExam.totalQuestions)
+    : 30;
+
+// Display examination details
+document.getElementById("examTitle").innerText = examTitle;
+
+document.getElementById("examDetails").innerText =
+    "Total Questions: " + examTotalQuestions +
+    " | Duration: " + examDuration + " Minutes";
+
+// Convert examiner questions into student exam format
+const questions = selectedExam && selectedExam.questions &&
+    selectedExam.questions.length > 0
+    ? selectedExam.questions.map((q, index) => ({
+        q: (index + 1) + ". " + q.question,
+        o: [
+            q.optionA,
+            q.optionB,
+            q.optionC,
+            q.optionD
+        ],
+        a: ["A", "B", "C", "D"].indexOf(q.correctAnswer)
+    }))
+    : defaultQuestions;
+
+let currentQuestion = 0;
+let answers = {};
+let timeLeft = examDuration * 60;
+let examFinished = false;
+
+function displayQuestion() {
+
+    const q = questions[currentQuestion];
+
+    document.getElementById("progress").innerText =
+        "Question " + (currentQuestion + 1) +
+        " of " + questions.length;
+
+    document.getElementById("question").innerText = q.q;
+
+    const optionsDiv = document.getElementById("options");
+    optionsDiv.innerHTML = "";
+
+    q.o.forEach((option, index) => {
+
+        const label = document.createElement("label");
+        label.className = "option";
+
+        const radio = document.createElement("input");
+        radio.type = "radio";
+        radio.name = "answer";
+        radio.value = index;
+
+        if (answers[currentQuestion] === index) {
+            radio.checked = true;
+        }
+
+        radio.addEventListener("change", function() {
+            answers[currentQuestion] = index;
+        });
+
+        label.appendChild(radio);
+        label.appendChild(document.createTextNode(
+            String.fromCharCode(65 + index) + ". " + option
+        ));
+
+        optionsDiv.appendChild(label);
+
+    });
+
+    document.getElementById("prevBtn").disabled =
+        currentQuestion === 0;
+
+    document.getElementById("nextBtn").disabled =
+        currentQuestion === questions.length - 1;
+
+}
+
+function nextQuestion() {
+
+    if (currentQuestion < questions.length - 1) {
+        currentQuestion++;
+        displayQuestion();
+    }
+
+}
+
+function previousQuestion() {
+
+    if (currentQuestion > 0) {
+        currentQuestion--;
+        displayQuestion();
+    }
+
+}
+
+function submitExam() {
+
+    if (examFinished) return;
+
+    const unanswered = questions.length -
+        Object.keys(answers).length;
+
+    if (unanswered > 0 && timeLeft > 0) {
+        const confirmSubmit = confirm(
+            "You have " + unanswered +
+            " unanswered questions. Do you want to submit?"
+        );
+
+        if (!confirmSubmit) return;
+    }
+
+    examFinished = true;
+    let completedAttempts =
+    Number(localStorage.getItem("completedAttempts") || 0);
+
+completedAttempts++;
+
+localStorage.setItem("completedAttempts", completedAttempts);
+
+clearInterval(timerInterval);
+
+// Stop webcam after exam submission
+if (cameraStream) {
+    cameraStream.getTracks().forEach(track => track.stop());
+    cameraStream = null;
+}
+
+document.getElementById("webcamBox").style.display = "none";
+
+    let correct = 0;
+
+    questions.forEach((q, index) => {
+        if (answers[index] === q.a) {
+            correct++;
+        }
+    });
+
+    const percentage = (correct / questions.length) * 100;
+    let examScores = JSON.parse(
+    localStorage.getItem("examScores") || "[]"
+);
+
+examScores.push(Number(percentage.toFixed(2)));
+
+localStorage.setItem("examScores", JSON.stringify(examScores));
+
+// Save examination result
+let examResults = JSON.parse(
+    localStorage.getItem("examResults") || "[]"
+);
+
+const resultDetails = {
+    student: "Student",
+    examName: "Computer Science Examination",
+    score: correct + " / " + questions.length,
+    percentage: percentage.toFixed(2) + "%",
+    warnings: warningCount,
+    status: "Completed"
+};
+
+examResults.push(resultDetails);
+
+localStorage.setItem(
+    "examResults",
+    JSON.stringify(examResults)
+);
+
+    document.getElementById("examCard").style.display = "none";
+    document.getElementById("result").style.display = "block";
+
+    document.getElementById("score").innerText =
+        "Your Score: " + correct + " / " + questions.length;
+
+    document.getElementById("percentage").innerText =
+        "Percentage: " + percentage.toFixed(2) + "%";
+
+    document.getElementById("message").innerText =
+        "Unanswered Questions: " + unanswered;
+    document.getElementById("resultWarnings").innerText =
+    "Warnings During Exam: " + warningCount;
+
+    document.getElementById("timer").innerText = "Submitted";
+
+}
+
+const timerInterval = setInterval(function() {
+
+    if (examFinished) {
+        clearInterval(timerInterval);
+        return;
+    }
+
+    let minutes = Math.floor(timeLeft / 60);
+    let seconds = timeLeft % 60;
+
+    document.getElementById("timer").innerText =
+        String(minutes).padStart(2, "0") + ":" +
+        String(seconds).padStart(2, "0");
+
+    if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        submitExam();
+        return;
+    }
+
+    timeLeft--;
+
+}, 1000);
+
+displayQuestion();
+
+</script>
+
+
+</body>
+</html>

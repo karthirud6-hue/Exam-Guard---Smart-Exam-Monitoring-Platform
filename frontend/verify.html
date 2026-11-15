@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f3f9;
+            margin: 0;
+            padding: 30px 15px;
+        }
+
+        .verification-box {
+            max-width: 420px;
+            margin: 60px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h2 {
+            color: #171c70;
+        }
+
+        p {
+            color: #555;
+            line-height: 1.5;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px;
+            margin-top: 15px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 18px;
+            text-align: center;
+            letter-spacing: 6px;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            margin-top: 20px;
+            background: #171c70;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #3039a0;
+        }
+
+        .resend {
+            background: #e8eaff;
+            color: #171c70;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="verification-box">
+
+        <h2>Email Verification</h2>
+
+        <p>
+            We have sent a verification code to your email address.
+            Please enter the OTP below.
+        </p>
+
+        <form action="index.html" method="get">
+            <input
+                type="text"
+                name="otp"
+                placeholder="Enter OTP"
+                maxlength="6"
+                pattern="[0-9]{6}"
+                inputmode="numeric"
+                required
+            >
+
+            <button type="submit">Verify Email</button>
+        </form>
+
+        <button class="resend" type="button"
+            onclick="alert('OTP sending will be connected with the backend later.')">
+            Resend OTP
+        </button>
+
+    </div>
+
+</body>
+</html>

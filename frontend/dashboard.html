@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f1f5fb;
+            color: #1e293b;
+        }
+
+        header {
+            background: #1e3a8a;
+            color: white;
+            padding: 22px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h2 {
+            font-size: 22px;
+        }
+
+        .logout {
+            background: white;
+            color: #1e3a8a;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .container {
+            width: 86%;
+            margin: 35px auto;
+        }
+
+        .welcome {
+            margin-bottom: 30px;
+        }
+
+        .welcome h1 {
+            color: #1e3a8a;
+            margin-bottom: 10px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 35px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+        }
+
+        .card h3 {
+            color: #64748b;
+            margin-bottom: 15px;
+        }
+
+        .card h2 {
+            color: #2563eb;
+            font-size: 30px;
+        }
+
+        .exam {
+            background: white;
+            padding: 28px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+        }
+
+        .exam h2 {
+            color: #1e3a8a;
+            margin-bottom: 20px;
+        }
+
+        .exam p {
+            margin-bottom: 14px;
+        }
+
+        .start-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .start-btn:hover {
+            background: #1e40af;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #64748b;
+        }
+
+        @media (max-width: 700px) {
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                padding: 18px 5%;
+            }
+
+            .container {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h2>Smart Exam Monitoring</h2>
+        <button class="logout" onclick="logout()">Logout</button>
+    </header>
+
+    <div class="container">
+
+        <div class="welcome">
+            <h1>Welcome, Student!</h1>
+            <p>Welcome to your examination dashboard.</p>
+        </div>
+
+        <div class="cards">
+
+            <div class="cards">
+
+    <div class="card">
+        <h3>Total Exams</h3>
+        <h2>01</h2>
+    </div>
+
+    <div class="card">
+    <h3>Attempts Completed</h3>
+    <h2 id="completedAttempts">00</h2>
+</div>
+
+    <div class="card">
+    <h3>Average Score</h3>
+    <h2 id="averageScore">--</h2>
+</div>
+
+</div>
+
+        <div class="exam">
+
+            <h2>Upcoming Examination</h2>
+
+            <h3>Computer Science Examination</h3>
+
+            <p>Duration: 60 Minutes</p>
+
+            <p>Total Questions: 30</p>
+
+            <p>Status: Available</p>
+
+            <button class="start-btn" onclick="startExam()">
+                Start Exam
+            </button>
+
+        </div>
+
+    </div>
+
+    <footer>
+        Smart Exam Monitoring System © 2026
+    </footer>
+
+    <script>
+        function startExam() {
+            window.location.href = "instructions.html";
+        }
+
+        function logout() {
+            window.location.href = "index.html";
+        }
+        const completedAttempts =
+    localStorage.getItem("completedAttempts") || 0;
+
+document.getElementById("completedAttempts").innerText =
+    String(completedAttempts).padStart(2, "0");
+    const examScores = JSON.parse(
+    localStorage.getItem("examScores") || "[]"
+);
+
+if (examScores.length > 0) {
+    const totalScore = examScores.reduce(
+        (sum, score) => sum + score, 0
+    );
+
+    const average = totalScore / examScores.length;
+
+    document.getElementById("averageScore").innerText =
+        average.toFixed(2) + "%";
+}
+    </script>
+
+</body>
+</html>
