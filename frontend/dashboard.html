@@ -189,34 +189,78 @@
         Smart Exam Monitoring System © 2026
     </footer>
 
-    <script>
-        function startExam() {
-            window.location.href = "instructions.html";
+   
+<script>
+    // Verify the student's login before showing the dashboard
+    async function verifyStudentAccess() {
+
+        const token = sessionStorage.getItem("access_token");
+        const role = sessionStorage.getItem("user_role");
+
+        if (!token || role !== "student") {
+            window.location.replace("index.html");
+            return;
         }
 
-        function logout() {
-            window.location.href = "index.html";
-        }
-        const completedAttempts =
-    localStorage.getItem("completedAttempts") || 0;
+        try {
+            const response = await fetch(
+                "http://127.0.0.1:8000/student/dashboard",
+                {
+                    method: "GET",
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    }
+                }
+            );
 
-document.getElementById("completedAttempts").innerText =
-    String(completedAttempts).padStart(2, "0");
+            if (!response.ok) {
+                sessionStorage.clear();
+                window.location.replace("index.html");
+                return;
+            }
+
+            const data = await response.json();
+
+            document.querySelector(".welcome h1").textContent =
+                "Welcome, " + data.user + "!";
+
+        } catch (error) {
+            alert("Cannot connect to the server. Please check whether the backend is running.");
+        }
+    }
+
+    function startExam() {
+        window.location.href = "instructions.html";
+    }
+
+    function logout() {
+        sessionStorage.clear();
+        window.location.replace("index.html");
+    }
+
+    // Display previously saved exam statistics
+    const completedAttempts =
+        localStorage.getItem("completedAttempts") || 0;
+
+    document.getElementById("completedAttempts").innerText =
+        String(completedAttempts).padStart(2, "0");
+
     const examScores = JSON.parse(
-    localStorage.getItem("examScores") || "[]"
-);
-
-if (examScores.length > 0) {
-    const totalScore = examScores.reduce(
-        (sum, score) => sum + score, 0
+        localStorage.getItem("examScores") || "[]"
     );
 
-    const average = totalScore / examScores.length;
+    if (examScores.length > 0) {
+        const totalScore = examScores.reduce(
+            (sum, score) => sum + score, 0
+        );
 
-    document.getElementById("averageScore").innerText =
-        average.toFixed(2) + "%";
-}
-    </script>
+        const average = totalScore / examScores.length;
 
+        document.getElementById("averageScore").innerText =
+            average.toFixed(2) + "%";
+    }
+
+    verifyStudentAccess();
+</script>
 </body>
 </html>

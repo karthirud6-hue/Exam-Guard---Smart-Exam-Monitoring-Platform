@@ -1,11 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Smart Examination Platform</title>
-
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -32,7 +31,6 @@
         <section class="hero">
 
             <div class="hero-content">
-
                 <span class="tag">SECURE DIGITAL ASSESSMENT</span>
 
                 <h1>
@@ -61,46 +59,51 @@
                     <span>✓ Smart Monitoring</span>
                     <span>✓ Integrity Analysis</span>
                 </div>
-
             </div>
 
             <div class="login-card" id="login">
 
                 <div class="card-icon">🔐</div>
 
-                <h2>Portal Login</h2>
+                <h2>Welcome Back!</h2>
+                <p class="subtitle">Login to access your examination portal</p>
 
-                <p class="subtitle">
-                    Sign in to access your examination portal
-                </p>
+                <form id="loginForm">
 
-                <form>
+                    <label for="username">Username</label>
+                    <input
+                        type="text"
+                        id="username"
+                        placeholder="Enter your username"
+                        required
+                    >
 
-                    <label>Username</label>
-                    <input type="text"
-                           placeholder="Enter your username"
-                           required>
+                    <label for="password">Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        placeholder="Enter your password"
+                        required
+                    >
 
-                    <label>Password</label>
-                    <input type="password"
-                           placeholder="Enter your password"
-                           required>
-
-                    <label>Login As</label>
-
+                    <label for="role">Login As</label>
                     <select id="role" required>
-    <option value="">Select your role</option>
-    <option value="student">Student</option>
-    <option value="examiner">Examiner</option>
-    <option value="admin">Administrator</option>
-</select>
+                        <option value="">Select your role</option>
+                        <option value="student">Student</option>
+                        <option value="examiner">Examiner</option>
+                        <option value="admin">Admin</option>
+                    </select>
 
-                    <button type="submit">Sign In →</button>
+                    <button type="submit" id="loginButton">
+                        Login
+                    </button>
+
+                    <p id="loginMessage" role="alert"></p>
 
                 </form>
 
                 <p class="security">
-                    🔒 Secure Examination Access
+                    🔒 Secure Authentication
                 </p>
 
             </div>
@@ -111,8 +114,8 @@
 
             <div class="section-heading">
                 <span>OUR CAPABILITIES</span>
-                <h2>Intelligent Examination Management</h2>
-                <p>Everything required for secure online examinations.</p>
+                <h2>Platform Features</h2>
+                <p>Everything needed for a secure digital examination environment.</p>
             </div>
 
             <div class="feature-grid">
@@ -124,13 +127,7 @@
                 </div>
 
                 <div class="feature">
-                    <div class="feature-icon">📝</div>
-                    <h3>Online Examination</h3>
-                    <p>Conduct examinations with questions and timers.</p>
-                </div>
-
-                <div class="feature">
-                    <div class="feature-icon">👁️</div>
+                    <div class="feature-icon">📹</div>
                     <h3>Smart Monitoring</h3>
                     <p>Record configured examination activities.</p>
                 </div>

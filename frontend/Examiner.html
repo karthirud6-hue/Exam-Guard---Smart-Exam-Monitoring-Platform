@@ -147,7 +147,7 @@
     <header>
         <h2>Smart Exam Monitoring System</h2>
 
-        <button onclick="window.location.href='index.html'">
+        <button onclick="logout()">
             Logout
         </button>
     </header>
@@ -220,7 +220,52 @@
         </div>
 
     </main>
-    <script>
+    
+<script>
+    // Verify examiner authentication
+    async function verifyExaminerAccess() {
+
+        const token = sessionStorage.getItem("access_token");
+        const role = sessionStorage.getItem("user_role");
+
+        if (!token || role !== "examiner") {
+            window.location.replace("index.html");
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                "http://127.0.0.1:8000/examiner/dashboard",
+                {
+                    method: "GET",
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                sessionStorage.clear();
+                window.location.replace("index.html");
+                return;
+            }
+
+            const data = await response.json();
+
+            document.querySelector(".welcome h1").textContent =
+                "Welcome, " + data.user + "!";
+
+        } catch (error) {
+            alert("Cannot connect to the server. Please check whether the backend is running.");
+        }
+    }
+
+    // Logout
+    function logout() {
+        sessionStorage.clear();
+        window.location.replace("index.html");
+    }
+
     // Total Examinations
     const examinations = JSON.parse(
         localStorage.getItem("examinations") || "[]"
@@ -240,7 +285,9 @@
 
     document.getElementById("examinationsCompleted").innerText =
         String(completedCount).padStart(2, "0");
-</script>
 
+    // Run authentication check
+    verifyExaminerAccess();
+</script>
 </body>
 </html>

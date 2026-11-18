@@ -46,3 +46,26 @@ def create_login_attempts_table():
 # Initialize database
 create_users_table()
 create_login_attempts_table()
+def create_exams_table():
+    conn = get_db_connection()
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS examinations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            exam_name TEXT NOT NULL,
+            subject TEXT NOT NULL,
+            exam_date TEXT NOT NULL,
+            start_time TEXT NOT NULL,
+            duration INTEGER NOT NULL,
+            total_marks INTEGER NOT NULL,
+            total_questions INTEGER NOT NULL,
+            created_by TEXT NOT NULL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    conn.commit()
+    conn.close()
+
+
+create_exams_table()

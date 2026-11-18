@@ -142,7 +142,7 @@
     <header>
         <h2>Smart Exam Monitoring System</h2>
 
-        <button onclick="window.location.href='index.html'">
+        <button onclick="logout()">
             Logout
         </button>
     </header>
@@ -224,7 +224,52 @@
         </div>
 
     </main>
-    <script>
+    
+<script>
+    // Verify Admin authentication
+    async function verifyAdminAccess() {
+
+        const token = sessionStorage.getItem("access_token");
+        const role = sessionStorage.getItem("user_role");
+
+        if (!token || role !== "admin") {
+            window.location.replace("index.html");
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                "http://127.0.0.1:8000/admin/dashboard",
+                {
+                    method: "GET",
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                sessionStorage.clear();
+                window.location.replace("index.html");
+                return;
+            }
+
+            const data = await response.json();
+
+            document.querySelector(".welcome h1").textContent =
+                "Welcome, " + data.user + "!";
+
+        } catch (error) {
+            alert("Cannot connect to the server. Please check whether the backend is running.");
+        }
+    }
+
+    // Logout
+    function logout() {
+        sessionStorage.clear();
+        window.location.replace("index.html");
+    }
+
     // Count Students
     const students = JSON.parse(
         localStorage.getItem("studentUsers") || "[]"
@@ -248,7 +293,9 @@
 
     document.getElementById("totalExaminations").innerText =
         String(examinations.length).padStart(2, "0");
-</script>
 
+    // Run authentication check
+    verifyAdminAccess();
+</script>
 </body>
 </html>

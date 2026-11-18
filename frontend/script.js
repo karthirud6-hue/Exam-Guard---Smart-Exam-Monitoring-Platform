@@ -1,49 +1,69 @@
+
 document.addEventListener("DOMContentLoaded", function () {
 
-    const form = document.querySelector("form");
+    const form = document.getElementById("loginForm");
+    const message = document.getElementById("loginMessage");
+    const loginButton = document.getElementById("loginButton");
 
-    form.addEventListener("submit", function (event) {
+    form.addEventListener("submit", async function (event) {
 
         event.preventDefault();
 
-        const username = document.querySelector('input[type="text"]').value.trim();
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value;
+        const selectedRole = document.getElementById("role").value;
 
-        const password = document.querySelector('input[type="password"]').value;
+        message.textContent = "";
+        loginButton.disabled = true;
+        loginButton.textContent = "Logging in...";
 
-        const role = document.getElementById("role").value;
+        try {
 
-        // Student login
-        if (
-            role === "student" &&
-            username === "student" &&
-            password === "12345"
-        ) {
-            alert("Login Successful! Welcome, Student!");
-            window.location.href = "dashboard.html";
-        }
+            const response = await fetch("http://127.0.0.1:8000/auth/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+            });
 
-        // Examiner login
-        else if (
-            role === "examiner" &&
-            username === "examiner" &&
-            password === "12345"
-        ) {
-            alert("Login Successful! Welcome, Examiner!");
-            window.location.href = "examiner.html";
-        }
+            const data = await response.json();
 
-        // Admin login
-        else if (
-            role === "admin" &&
-            username === "admin" &&
-            password === "12345"
-        ) {
-            alert("Login Successful! Welcome, Admin!");
-            window.location.href = "admin.html";
-        }
+            if (!response.ok) {
+                throw new Error(data.detail || "Login failed.");
+            }
 
-        else {
-            alert("Invalid Username, Password or Role!");
+            if (data.role !== selectedRole) {
+                throw new Error("The selected role does not match your account.");
+            }
+
+            sessionStorage.setItem("access_token", data.access_token);
+            sessionStorage.setItem("user_role", data.role);
+
+            alert("Login successful! Welcome, " + data.role + "!");
+
+            if (data.role === "student") {
+                window.location.href = "dashboard.html";
+            }
+            else if (data.role === "examiner") {
+                window.location.href = "Examiner.html";
+            }
+            else if (data.role === "admin") {
+                window.location.href = "Admin.html";
+            }
+
+        } catch (error) {
+
+            message.textContent = error.message;
+
+        } finally {
+
+            loginButton.disabled = false;
+            loginButton.textContent = "Login";
+
         }
 
     });

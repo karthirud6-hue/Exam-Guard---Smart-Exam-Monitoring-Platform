@@ -73,84 +73,177 @@
 
     <div id="examList"></div>
 
-    <button class="back-btn"
-        onclick="window.location.href='examiner.html'">
+    <button class="back-btn" onclick="goBack()">
         Back to Dashboard
     </button>
 </main>
 
 <script>
-    function displayExams() {
-        const exams = JSON.parse(
-            localStorage.getItem("examinations") || "[]"
-        );
+    const API_URL = "http://127.0.0.1:8000";
 
-        const examList = document.getElementById("examList");
+    // Check login and role
+    async function verifyAccess() {
+        const token = sessionStorage.getItem("access_token");
+        const role = sessionStorage.getItem("user_role");
 
-        examList.innerHTML = "";
-
-        if (exams.length === 0) {
-            examList.innerHTML = "<p>No examinations created yet.</p>";
-            return;
+        if (!token || !["admin", "examiner"].includes(role)) {
+            window.location.replace("index.html");
+            return false;
         }
 
-        exams.forEach((exam, index) => {
-            const card = document.createElement("div");
-            card.className = "exam-card";
+        try {
+            const response = await fetch(
+                `${API_URL}/${role}/dashboard`,
+                {
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    }
+                }
+            );
 
-            card.innerHTML = `
-                <h3>${escapeHTML(exam.examName)}</h3>
-                <p>
+            if (!response.ok) {
+                sessionStorage.clear();
+                window.location.replace("index.html");
+                return false;
+            }
+
+            return true;
+
+        } catch (error) {
+            alert("Cannot connect to backend.");
+            return false;
+        }
+    }
+
+    // Display examinations from SQLite
+    async function displayExams() {
+        const token = sessionStorage.getItem("access_token");
+        const examList = document.getElementById("examList");
+
+        examList.textContent = "Loading examinations...";
+
+        try {
+            const response = await fetch(`${API_URL}/exams`, {
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error("Unable to retrieve examinations.");
+            }
+
+            const exams = await response.json();
+            examList.innerHTML = "";
+
+            if (exams.length === 0) {
+                examList.textContent = "No examinations created yet.";
+                return;
+            }
+
+            exams.forEach(exam => {
+                const card = document.createElement("div");
+                card.className = "exam-card";
+
+                const title = document.createElement("h3");
+                title.textContent = exam.exam_name;
+
+                const details = document.createElement("p");
+                details.innerHTML = `
                     <strong>Subject:</strong> ${escapeHTML(exam.subject)}<br>
-                    <strong>Date:</strong> ${escapeHTML(exam.examDate)}<br>
-                    <strong>Start Time:</strong> ${escapeHTML(exam.startTime)}<br>
+                    <strong>Date:</strong> ${escapeHTML(exam.exam_date)}<br>
+                    <strong>Start Time:</strong> ${escapeHTML(exam.start_time)}<br>
                     <strong>Duration:</strong> ${escapeHTML(exam.duration)} minutes<br>
-                    <strong>Total Marks:</strong> ${escapeHTML(exam.totalMarks)}<br>
-                    <strong>Questions:</strong> ${escapeHTML(exam.totalQuestions)}
-                </p>
-                <button class="delete-btn"
-                    onclick="deleteExam(${index})">
-                    Delete Examination
-                </button>
-            `;
+                    <strong>Total Marks:</strong> ${escapeHTML(exam.total_marks)}<br>
+                    <strong>Questions:</strong> ${escapeHTML(exam.total_questions)}<br>
+                    <strong>Created By:</strong> ${escapeHTML(exam.created_by)}
+                `;
 
-            examList.appendChild(card);
-        });
+                const deleteButton = document.createElement("button");
+                deleteButton.className = "delete-btn";
+                deleteButton.textContent = "Delete Examination";
+
+                deleteButton.addEventListener("click", () => {
+                    deleteExam(exam.id);
+                });
+
+                card.appendChild(title);
+                card.appendChild(details);
+                card.appendChild(deleteButton);
+
+                examList.appendChild(card);
+            });
+
+        } catch (error) {
+            examList.textContent = error.message;
+        }
     }
 
+    // Escape text before displaying it
     function escapeHTML(value) {
-        return String(value).replace(/[&<>"']/g, function(character) {
-            return {
-                "&": "&amp;",
-                "<": "&lt;",
-                ">": "&gt;",
-                '"': "&quot;",
-                "'": "&#39;"
-            }[character];
-        });
+        return String(value).replace(/[&<>"']/g, character => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+        })[character]);
     }
 
-    function deleteExam(index) {
+    // Delete examination from SQLite
+    async function deleteExam(examId) {
         if (!confirm("Are you sure you want to delete this examination?")) {
             return;
         }
 
-        const exams = JSON.parse(
-            localStorage.getItem("examinations") || "[]"
-        );
+        const token = sessionStorage.getItem("access_token");
 
-        exams.splice(index, 1);
+        try {
+            const response = await fetch(
+                `${API_URL}/exams/${examId}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    }
+                }
+            );
 
-        localStorage.setItem(
-            "examinations",
-            JSON.stringify(exams)
-        );
+            const data = await response.json();
 
-        displayExams();
+            if (!response.ok) {
+                throw new Error(data.detail || "Could not delete examination.");
+            }
+
+            alert(data.message);
+            displayExams();
+
+        } catch (error) {
+            alert(error.message);
+        }
     }
 
-    displayExams();
-</script>
+    // Back to appropriate dashboard
+    function goBack() {
+        const role = sessionStorage.getItem("user_role");
 
+        if (role === "admin") {
+            window.location.href = "Admin.html";
+        } else {
+            window.location.href = "Examiner.html";
+        }
+    }
+
+    // Check access before loading examinations
+    async function initializePage() {
+        const allowed = await verifyAccess();
+
+        if (allowed) {
+            displayExams();
+        }
+    }
+
+    initializePage();
+</script>
 </body>
 </html>

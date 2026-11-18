@@ -109,38 +109,108 @@
         </form>
 
     </div>
-    <script>
-    document.getElementById("examForm").addEventListener("submit", function(event) {
+    
+<script>
+    // Allow only Admin and Examiner accounts
+    async function verifyAccess() {
 
-        event.preventDefault();
+        const token = sessionStorage.getItem("access_token");
+        const role = sessionStorage.getItem("user_role");
 
-        const exam = {
-            examName: document.getElementById("examName").value,
-            subject: document.getElementById("subject").value,
-            examDate: document.getElementById("examDate").value,
-            startTime: document.getElementById("startTime").value,
-            duration: document.getElementById("duration").value,
-            totalMarks: document.getElementById("totalMarks").value,
-            totalQuestions: document.getElementById("totalQuestions").value
-        };
+        if (!token || !["admin", "examiner"].includes(role)) {
+            window.location.replace("index.html");
+            return false;
+        }
 
-        let examinations = JSON.parse(
-            localStorage.getItem("examinations") || "[]"
-        );
+        try {
+            const response = await fetch(
+                "http://127.0.0.1:8000/" + role + "/dashboard",
+                {
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    }
+                }
+            );
 
-        examinations.push(exam);
+            if (!response.ok) {
+                sessionStorage.clear();
+                window.location.replace("index.html");
+                return false;
+            }
 
-        localStorage.setItem(
-            "examinations",
-            JSON.stringify(examinations)
-        );
+            return true;
 
-        alert("Examination created successfully!");
+        } catch (error) {
+            alert("Cannot connect to the backend. Please check whether the server is running.");
+            return false;
+        }
+    }
 
-        window.location.href = "examiner.html";
+    // Submit examination details to backend
+    document.getElementById("examForm").addEventListener(
+        "submit",
+        async function(event) {
 
-    });
+            event.preventDefault();
+
+            const token = sessionStorage.getItem("access_token");
+
+            const exam = {
+                examName: document.getElementById("examName").value.trim(),
+                subject: document.getElementById("subject").value.trim(),
+                examDate: document.getElementById("examDate").value,
+                startTime: document.getElementById("startTime").value,
+                duration: Number(document.getElementById("duration").value),
+                totalMarks: Number(document.getElementById("totalMarks").value),
+                totalQuestions: Number(document.getElementById("totalQuestions").value)
+            };
+
+            const submitButton = document.querySelector(
+                "#examForm button[type='submit']"
+            );
+
+            submitButton.disabled = true;
+            submitButton.textContent = "Creating...";
+
+            try {
+
+                const response = await fetch(
+                    "http://127.0.0.1:8000/exams",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer " + token
+                        },
+                        body: JSON.stringify(exam)
+                    }
+                );
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || "Could not create examination.");
+                }
+
+                alert(data.message);
+
+                window.location.href = "Examiner.html";
+
+            } catch (error) {
+
+                alert(error.message);
+
+            } finally {
+
+                submitButton.disabled = false;
+                submitButton.textContent = "Create Examination";
+
+            }
+        }
+    );
+
+    // Check access when the page opens
+    verifyAccess();
 </script>
-
 </body>
 </html>
