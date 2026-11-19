@@ -3,102 +3,318 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exam Invitation</title>
+
+    <title>Examination Invitation | Smart Exam Platform</title>
 
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f1f3f9;
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            min-height: 100vh;
+            background: #FFF4C2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             padding: 30px 15px;
         }
 
-        .invitation-box {
-            max-width: 550px;
-            margin: 40px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        /* TOP BRAND */
+
+        .top-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 28px;
+            color: #222222;
         }
 
-        h2 {
-            color: #171c70;
+        .brand-icon {
+            width: 48px;
+            height: 48px;
+            background: #f5c400;
+            color: #222222;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            font-weight: bold;
+            font-size: 17px;
+        }
+
+        .top-brand h2 {
+            font-size: 19px;
+            letter-spacing: 1.5px;
+        }
+
+        .top-brand small {
+            display: block;
+            font-size: 9px;
+            letter-spacing: 2px;
+            color: #555555;
+            margin-top: 4px;
+        }
+
+        /* INVITATION CARD */
+
+        .invitation-box {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 20px 55px rgba(0, 0, 0, 0.15);
+        }
+
+        /* INVITATION HEADER */
+
+        .invitation-header {
+            background: #f5c400;
+            padding: 35px 35px 32px;
+            color: #222222;
             text-align: center;
         }
 
-        .exam-details {
-            background: #f1f3ff;
-            padding: 18px;
-            border-radius: 8px;
-            margin: 20px 0;
+        .invitation-icon {
+            width: 65px;
+            height: 65px;
+            margin: 0 auto 17px;
+            background: rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 18px;
+            display: grid;
+            place-items: center;
+            font-size: 30px;
         }
 
-        .exam-details p {
-            margin: 12px 0;
+        .invitation-header span {
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: #333333;
+            font-weight: 600;
         }
+
+        .invitation-header h1 {
+            font-size: 26px;
+            margin-top: 12px;
+            color: #222222;
+        }
+
+        /* INVITATION CONTENT */
+
+        .invitation-content {
+            padding: 35px;
+        }
+
+        .invitation-content h3 {
+            color: #222222;
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+
+        .invitation-content > p {
+            color: #444444;
+            font-size: 14px;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        /* EXAMINATION INFORMATION */
+
+        .exam-details {
+            background: #fff9e6;
+            border: 1px solid #f1df9b;
+            border-radius: 12px;
+            padding: 22px;
+            margin: 25px 0;
+        }
+
+        .details-heading {
+            color: #000000;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 17px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            padding: 13px 0;
+            border-bottom: 1px solid #e9dfc3;
+            font-size: 13px;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #000000;
+        }
+
+        .detail-value {
+            color: #000000;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        /* IMPORTANT NOTICE */
+
+        .notice {
+            background: #fff8e9;
+            border-left: 4px solid #e5b600;
+            padding: 14px 16px;
+            border-radius: 6px;
+            color: #333333;
+            font-size: 12px;
+            line-height: 1.7;
+            margin: 22px 0;
+        }
+
+        /* REGISTRATION BUTTON */
 
         .register-btn {
             display: block;
-            background: #171c70;
-            color: white;
+            width: 100%;
             text-align: center;
-            padding: 14px;
+            padding: 15px;
+            background: #f5c400;
+            color: #222222;
             text-decoration: none;
-            border-radius: 6px;
-            margin-top: 25px;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: 700;
+            transition: 0.25s;
         }
 
         .register-btn:hover {
-            background: #3039a0;
+            background: #e5b600;
+            color: #222222;
+            transform: translateY(-2px);
+            box-shadow: 0 7px 18px rgba(180, 140, 0, 0.2);
         }
 
-        .footer {
+        /* FOOTER */
+
+        .invitation-footer {
             text-align: center;
-            color: gray;
-            font-size: 13px;
-            margin-top: 25px;
+            padding: 0 20px 25px;
+            color: #666666;
+            font-size: 11px;
+            line-height: 1.8;
         }
+
+        /* MOBILE RESPONSIVENESS */
+
+        @media (max-width: 500px) {
+            .invitation-content {
+                padding: 25px 20px;
+            }
+
+            .invitation-header {
+                padding: 28px 20px;
+            }
+
+            .invitation-header h1 {
+                font-size: 22px;
+            }
+
+            .detail-row {
+                font-size: 12px;
+            }
+        }
+
     </style>
 </head>
 
 <body>
 
-    <div class="invitation-box">
+    <div class="top-brand">
+        <div class="brand-icon">SE</div>
 
-        <h2>Smart Exam Monitoring System</h2>
-
-        <h3>You Are Invited to an Examination!</h3>
-
-        <p>Dear Candidate,</p>
-
-        <p>
-            You have been invited to attend an online examination.
-            Please find your examination details below.
-        </p>
-
-        <div class="exam-details">
-            <p><strong>Examination:</strong> Computer Science</p>
-            <p><strong>Date:</strong> To be scheduled</p>
-            <p><strong>Time:</strong> To be scheduled</p>
-            <p><strong>Duration:</strong> 60 Minutes</p>
+        <div>
+            <h2>SMART EXAM</h2>
+            <small>EXAMINATION PLATFORM</small>
         </div>
-
-        <p>
-            If you are a first-time candidate, please register
-            before accessing the examination.
-        </p>
-
-        <a href="register.html" class="register-btn">
-            Register / Access Examination
-        </a>
-
-        <div class="footer">
-            <p>Best Regards,</p>
-            <p>Smart Exam Monitoring System Team</p>
-        </div>
-
     </div>
+
+    <main class="invitation-box">
+
+        <section class="invitation-header">
+
+            <div class="invitation-icon">✉</div>
+
+            <span>OFFICIAL EXAMINATION INVITATION</span>
+
+            <h1>Your Examination Awaits!</h1>
+
+        </section>
+
+        <section class="invitation-content">
+
+            <h3>Dear Candidate,</h3>
+
+            <p>
+                You are invited to participate in an online examination
+                through our digital examination platform.
+                Please review the examination details below.
+            </p>
+
+            <div class="exam-details">
+
+                <div class="details-heading">
+                    EXAMINATION INFORMATION
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Examination</span>
+                    <span class="detail-value">Computer Science</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Date</span>
+                    <span class="detail-value">To be scheduled</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Time</span>
+                    <span class="detail-value">To be scheduled</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Duration</span>
+                    <span class="detail-value">60 Minutes</span>
+                </div>
+
+            </div>
+
+            <div class="notice">
+                <strong>Important:</strong>
+                First-time candidates must complete registration
+                before accessing the examination portal.
+            </div>
+
+            <a href="register.html" class="register-btn">
+                Register / Access Examination &nbsp; →
+            </a>
+
+        </section>
+
+        <footer class="invitation-footer">
+
+            <p>Thank you for choosing our examination platform.</p>
+
+            <p>© 2026 Smart Exam Platform</p>
+
+        </footer>
+
+    </main>
 
 </body>
 </html>

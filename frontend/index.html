@@ -3,166 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Smart Examination Platform</title>
-
+    <title>Smart Exam Platform | Login</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
-<body>
+<body class="login-page">
 
-    <header class="navbar">
-        <div class="brand">
-            <div class="brand-icon">SE</div>
+    <header class="login-header">
+        <div class="login-brand">
+            <div class="login-logo">SE</div>
             <div>
                 <h2>SMART EXAM</h2>
-                <small>EXAMINATION MONITORING SYSTEM</small>
+                <span>EXAMINATION PLATFORM</span>
             </div>
         </div>
 
-        <nav>
-            <a href="#home">Home</a>
-            <a href="#features">Features</a>
-            <a href="#login">Login</a>
-        </nav>
+        <div class="header-security">
+            <span class="security-dot"></span>
+            Secure Examination Portal
+        </div>
     </header>
 
-    <main id="home">
+    <main class="login-container">
 
-        <section class="hero">
+        <div class="login-heading">
+            <span class="heading-line"></span>
+            <p>EXAM GUARD – SMART EXAM MONITORING</p>
 
-            <div class="hero-content">
+            <h1>Smart and Secure Online Examination</h1>
 
-                <span class="tag">SECURE DIGITAL ASSESSMENT</span>
+            <span>
+                Exam Guard is a smart examination monitoring platform
+                designed to conduct online exams securely and efficiently.
+                It uses webcam-based face detection to monitor candidates
+                during examinations and helps maintain a fair testing
+                environment.
+            </span>
+        </div>
 
-                <h1>
-                    Smart Examination
-                    <span>Monitoring Platform</span>
-                </h1>
+        <section class="login-card">
 
-                <p>
-                    A secure and intelligent platform designed
-                    to conduct online examinations, monitor
-                    examination activities, analyse integrity
-                    and generate comprehensive reports.
-                </p>
+            <div class="login-card-icon">↗</div>
 
-                <div class="hero-buttons">
-                    <a href="#login" class="primary-btn">
-                        Access Examination Portal
-                    </a>
-                    <a href="#features" class="secondary-btn">
-                        Explore Features
-                    </a>
-                </div>
+            <h2>Portal Login</h2>
 
-                <div class="trust">
-                    <span>✓ Secure Access</span>
-                    <span>✓ Smart Monitoring</span>
-                    <span>✓ Integrity Analysis</span>
-                </div>
+            <p class="login-subtitle">
+                Enter your login details below
+            </p>
 
-            </div>
+            <form id="loginForm">
 
-            <div class="login-card" id="login">
+                <label for="email">Email Address</label>
 
-                <div class="card-icon">🔐</div>
+                <input
+                    type="email"
+                    id="email"
+                    placeholder="Enter your registered email"
+                    required
+                >
 
-                <h2>Portal Login</h2>
+                <label for="password">Password</label>
 
-                <p class="subtitle">
-                    Sign in to access your examination portal
-                </p>
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Enter your password"
+                    required
+                >
 
-                <form>
+                <label for="role">Select Your Role</label>
 
-                    <label>Username</label>
-                    <input type="text"
-                           placeholder="Enter your username"
-                           required>
+                <select id="role" required>
+                    <option value="">Choose your role</option>
+                    <option value="student">Student</option>
+                    <option value="examiner">Examiner</option>
+                    <option value="admin">Administrator</option>
+                </select>
 
-                    <label>Password</label>
-                    <input type="password"
-                           placeholder="Enter your password"
-                           required>
+                <button type="submit" class="login-button">
+                    Sign In <span>→</span>
+                </button>
 
-                    <label>Login As</label>
+            </form>
 
-                    <select id="role" required>
-    <option value="">Select your role</option>
-    <option value="student">Student</option>
-    <option value="examiner">Examiner</option>
-    <option value="admin">Administrator</option>
-</select>
-
-                    <button type="submit">Sign In →</button>
-
-                </form>
-
-                <p class="security">
-                    🔒 Secure Examination Access
-                </p>
-
+            <div class="login-card-bottom">
+                <span>🔒</span>
+                Secure access to your examination account
             </div>
 
         </section>
 
-        <section class="features" id="features">
-
-            <div class="section-heading">
-                <span>OUR CAPABILITIES</span>
-                <h2>Intelligent Examination Management</h2>
-                <p>Everything required for secure online examinations.</p>
-            </div>
-
-            <div class="feature-grid">
-
-                <div class="feature">
-                    <div class="feature-icon">👨‍🎓</div>
-                    <h3>Student Management</h3>
-                    <p>Manage student accounts and examination access.</p>
-                </div>
-
-                <div class="feature">
-                    <div class="feature-icon">📝</div>
-                    <h3>Online Examination</h3>
-                    <p>Conduct examinations with questions and timers.</p>
-                </div>
-
-                <div class="feature">
-                    <div class="feature-icon">👁️</div>
-                    <h3>Smart Monitoring</h3>
-                    <p>Record configured examination activities.</p>
-                </div>
-
-                <div class="feature">
-                    <div class="feature-icon">📊</div>
-                    <h3>Integrity Analysis</h3>
-                    <p>Analyse recorded events for teacher review.</p>
-                </div>
-
-                <div class="feature">
-                    <div class="feature-icon">📄</div>
-                    <h3>Automated Reports</h3>
-                    <p>Generate examination performance and activity reports.</p>
-                </div>
-
-                <div class="feature">
-                    <div class="feature-icon">🔒</div>
-                    <h3>Secure Platform</h3>
-                    <p>Protect examination accounts and submitted data.</p>
-                </div>
-
-            </div>
-
-        </section>
+        <footer class="login-footer">
+            <span>© 2026 Smart Exam Platform</span>
+            <span>Secure • Intelligent • Transparent</span>
+        </footer>
 
     </main>
-
-    <footer>
-        <p>© 2026 Smart Examination Monitoring Platform</p>
-        <p>Secure • Intelligent • Transparent</p>
-    </footer>
 
     <script src="script.js"></script>
 

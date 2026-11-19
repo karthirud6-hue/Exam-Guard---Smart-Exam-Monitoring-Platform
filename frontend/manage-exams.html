@@ -6,17 +6,29 @@
     <title>Manage Examinations</title>
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            background: #f4f7fc;
-            color: #333;
+            background: #FFF4C2;
+            color: #222;
         }
 
         header {
-            background: #1746a2;
-            color: white;
-            padding: 20px 5%;
+            background: #F5C400;
+            color: #000;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+
+        header h2 {
+            margin: 0;
+            color: #000;
+            font-size: 23px;
         }
 
         main {
@@ -25,38 +37,93 @@
             padding: 20px;
         }
 
-        h2 {
-            color: #1746a2;
+        main h2 {
+            color: #000;
+            margin-bottom: 10px;
+        }
+
+        main > p {
+            color: #555;
+            margin-bottom: 25px;
         }
 
         .exam-card {
             background: white;
-            padding: 20px;
+            padding: 25px;
             margin: 18px 0;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-radius: 12px;
+            border: 1px solid #f0e5b5;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+        }
+
+        .exam-card h3 {
+            color: #000;
+            margin-bottom: 15px;
         }
 
         .exam-card p {
-            line-height: 1.7;
+            line-height: 1.9;
+            color: #444;
         }
 
         button {
-            background: #1746a2;
-            color: white;
+            background: #F5C400;
+            color: #000;
             border: none;
-            padding: 10px 16px;
-            border-radius: 5px;
+            padding: 11px 18px;
+            border-radius: 7px;
             cursor: pointer;
             margin: 5px;
+            font-weight: bold;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #dfb200;
         }
 
         .delete-btn {
-            background: #d93025;
+            background: #dc3545;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #b52a36;
         }
 
         .back-btn {
             margin-top: 20px;
+        }
+
+        .empty-message {
+            background: white;
+            padding: 22px;
+            border-radius: 10px;
+            color: #555;
+            text-align: center;
+            border: 1px solid #f0e5b5;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #555;
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            main {
+                padding: 15px;
+            }
+
+            .exam-card {
+                padding: 18px;
+            }
+
+            header h2 {
+                font-size: 20px;
+            }
         }
     </style>
 </head>
@@ -64,23 +131,32 @@
 <body>
 
 <header>
-    <h2 style="color:white;">Smart Exam Monitoring System</h2>
+    <h2>ONLINE EXAMINATION PORTAL</h2>
 </header>
 
 <main>
+
     <h2>Manage Examinations</h2>
+
     <p>View and manage examinations created by the examiner.</p>
 
     <div id="examList"></div>
 
     <button class="back-btn"
         onclick="window.location.href='examiner.html'">
-        Back to Dashboard
+        ← Back to Dashboard
     </button>
+
 </main>
 
+<footer>
+    Exam Guard © 2026
+</footer>
+
 <script>
+
     function displayExams() {
+
         const exams = JSON.parse(
             localStorage.getItem("examinations") || "[]"
         );
@@ -90,24 +166,32 @@
         examList.innerHTML = "";
 
         if (exams.length === 0) {
-            examList.innerHTML = "<p>No examinations created yet.</p>";
+
+            examList.innerHTML =
+                '<p class="empty-message">No examinations created yet.</p>';
+
             return;
+
         }
 
         exams.forEach((exam, index) => {
+
             const card = document.createElement("div");
+
             card.className = "exam-card";
 
             card.innerHTML = `
-                <h3>${escapeHTML(exam.examName)}</h3>
+                <h3>${escapeHTML(exam.examName || exam.name || "")}</h3>
+
                 <p>
-                    <strong>Subject:</strong> ${escapeHTML(exam.subject)}<br>
-                    <strong>Date:</strong> ${escapeHTML(exam.examDate)}<br>
-                    <strong>Start Time:</strong> ${escapeHTML(exam.startTime)}<br>
-                    <strong>Duration:</strong> ${escapeHTML(exam.duration)} minutes<br>
-                    <strong>Total Marks:</strong> ${escapeHTML(exam.totalMarks)}<br>
-                    <strong>Questions:</strong> ${escapeHTML(exam.totalQuestions)}
+                    <strong>Subject:</strong> ${escapeHTML(exam.subject || "")}<br>
+                    <strong>Date:</strong> ${escapeHTML(exam.examDate || "")}<br>
+                    <strong>Start Time:</strong> ${escapeHTML(exam.startTime || "")}<br>
+                    <strong>Duration:</strong> ${escapeHTML(exam.duration || "")} minutes<br>
+                    <strong>Total Marks:</strong> ${escapeHTML(exam.totalMarks || "")}<br>
+                    <strong>Questions:</strong> ${escapeHTML(exam.totalQuestions || "")}
                 </p>
+
                 <button class="delete-btn"
                     onclick="deleteExam(${index})">
                     Delete Examination
@@ -115,11 +199,15 @@
             `;
 
             examList.appendChild(card);
+
         });
+
     }
 
     function escapeHTML(value) {
+
         return String(value).replace(/[&<>"']/g, function(character) {
+
             return {
                 "&": "&amp;",
                 "<": "&lt;",
@@ -127,10 +215,13 @@
                 '"': "&quot;",
                 "'": "&#39;"
             }[character];
+
         });
+
     }
 
     function deleteExam(index) {
+
         if (!confirm("Are you sure you want to delete this examination?")) {
             return;
         }
@@ -147,9 +238,11 @@
         );
 
         displayExams();
+
     }
 
     displayExams();
+
 </script>
 
 </body>

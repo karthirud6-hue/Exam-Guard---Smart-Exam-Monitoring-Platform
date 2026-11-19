@@ -3,158 +3,289 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Examination</title>
+    <title>Smart Exam Monitoring System</title>
 
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
     <style>
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
+            font-family: Arial, sans-serif;
         }
 
         body {
-            font-family: Arial, sans-serif;
-            background: #f2f4f8;
-            margin: 0;
-            color: #26344a;
+            background: #FFF4C2;
+            min-height: 100vh;
+            color: #333;
         }
 
         header {
-            background: #171c70;
-            color: white;
-            padding: 20px;
+            background: #F5C400;
+            padding: 18px 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
         }
 
-        .timer {
+        header h1 {
+            font-size: 24px;
+            color: #222;
+        }
+
+        #timer {
             background: white;
-            color: #e53935;
-            padding: 12px 18px;
+            padding: 10px 20px;
             border-radius: 8px;
-            font-weight: bold;
             font-size: 20px;
+            font-weight: bold;
+            color: #222;
         }
 
         .container {
-            max-width: 900px;
-            margin: 35px auto;
-            padding: 20px;
+            width: 90%;
+            max-width: 1100px;
+            margin: 25px auto;
         }
 
-        .exam-card {
+        .card {
             background: white;
-            padding: 30px;
+            padding: 25px;
             border-radius: 12px;
-            box-shadow: 0 3px 12px #00000015;
-        }
-        
-        .webcam-box {
-            background: white;
-            padding: 15px;
             margin-bottom: 20px;
-            border-radius: 10px;
+            border: 2px solid #F5C400;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        p {
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background: #F5C400;
+            color: #222;
+            border: none;
+            padding: 11px 20px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            margin: 5px;
+        }
+
+        button:hover {
+            background: #e0b400;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        #webcamBox {
+            display: none;
             text-align: center;
-}
-
-#examCamera {
-    width: 220px;
-    max-width: 100%;
-    border: 3px solid #171c70;
-    border-radius: 10px;
-    background: black;
-}
-
-#cameraStatus {
-    font-weight: bold;
-    color: green;
-}
-
-        .progress {
-            color: #5378c5;
-            font-weight: bold;
-            margin-bottom: 20px;
         }
 
-        .question {
-            font-size: 21px;
+        #examCamera {
+            width: 240px;
+            height: 180px;
+            object-fit: cover;
+            border: 4px solid #F5C400;
+            border-radius: 10px;
+            background: #222;
+        }
+
+        #cameraStatus,
+        #faceStatus,
+        #warningDisplay {
+            margin-top: 10px;
             font-weight: bold;
-            margin-bottom: 25px;
+        }
+
+        #warningDisplay {
+            color: red;
+        }
+
+        #instructionsCard {
+            display: block;
+        }
+
+        #examCard,
+        #result {
+            display: none;
+        }
+
+        .exam-info {
+            background: #fff9df;
+            border: 1px solid #f5c400;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        #progress {
+            height: 12px;
+            background: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        #progressBar {
+            height: 100%;
+            width: 0%;
+            background: #F5C400;
+            transition: width 0.3s;
+        }
+
+        #question {
+            font-size: 19px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        #options {
+            margin: 15px 0;
         }
 
         .option {
             display: block;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            margin: 12px 0;
+            background: #fff9df;
+            padding: 13px;
+            margin: 10px 0;
+            border: 1px solid #e5cf65;
+            border-radius: 7px;
             cursor: pointer;
         }
 
         .option:hover {
-            background: #eef3ff;
+            background: #fff0ae;
         }
 
         .option input {
-            margin-right: 12px;
+            margin-right: 10px;
         }
 
-        .buttons {
+        .navigation {
             display: flex;
             justify-content: space-between;
-            gap: 10px;
-            margin-top: 30px;
+            flex-wrap: wrap;
+            margin-top: 20px;
         }
 
-        button {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 7px;
-            background: #397bc5;
-            color: white;
-            cursor: pointer;
-            font-size: 16px;
+        #questionPalette {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+            gap: 8px;
+            margin: 15px 0;
         }
 
-        button:disabled {
-            background: #aaa;
-            cursor: not-allowed;
+        .palette-btn {
+            padding: 10px 5px;
+            margin: 0;
+            background: #eee;
+            border: 2px solid transparent;
         }
 
-        .submit-btn {
-            background: #159447;
+        .palette-btn.answered {
+            background: #F5C400;
         }
 
-        .result {
-            display: none;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
+        .palette-btn.review {
+            background: #c9a0ff;
+        }
+
+        .palette-btn.current {
+            border: 2px solid #222;
+        }
+
+        .palette-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 12px 0;
+            font-size: 13px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        .answered-color {
+            background: #F5C400;
+        }
+
+        .review-color {
+            background: #c9a0ff;
+        }
+
+        .not-answered-color {
+            background: #eee;
+            border: 1px solid #aaa;
+        }
+
+        #answerCount {
+            font-weight: bold;
+            margin: 12px 0;
+        }
+
+        #reviewButton {
+            background: #b58bea;
+        }
+
+        #result {
             text-align: center;
         }
 
-        footer {
-            text-align: center;
+        #result h2 {
+            color: #16833b;
+        }
+
+        .result-details {
+            background: #fff9df;
             padding: 20px;
-            color: #777;
+            border-radius: 8px;
+            margin-top: 15px;
         }
 
-        @media(max-width: 600px) {
-            .container {
-                margin: 15px auto;
-                padding: 12px;
-            }
-
-            .exam-card {
-                padding: 18px;
-            }
-
+        @media (max-width: 600px) {
             header {
                 flex-direction: column;
                 gap: 12px;
             }
 
-            .buttons {
-                flex-wrap: wrap;
+            header h1 {
+                font-size: 20px;
+            }
+
+            .container {
+                width: 95%;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            #examCamera {
+                width: 200px;
+                height: 150px;
             }
         }
     </style>
@@ -163,610 +294,1223 @@
 <body>
 
 <header>
-    <h2>Smart Exam Monitoring</h2>
-    <div class="timer" id="timer">60:00</div>
+    <h1>Smart Exam Monitoring System</h1>
+    <div id="timer">60:00</div>
 </header>
 
 <div class="container">
 
-    <div class="webcam-box" id="webcamBox">
-        <h3>Live Webcam Monitoring</h3>
-        <video id="examCamera" autoplay playsinline muted></video>
-        <p id="cameraStatus">Connecting to camera...</p>
-        <p id="faceStatus">Face detection is not started yet.</p>
-        <p id="warningDisplay">warnings:0</p>
+    <!-- INSTRUCTIONS SECTION -->
+    <div class="card" id="instructionsCard">
+        <h2>Exam Instructions</h2>
+
+        <div class="exam-info">
+            <p><strong>Exam Name:</strong> <span id="instructionExamTitle">Computer Science Examination</span></p>
+            <p><strong>Duration:</strong> <span id="instructionDuration">60</span> minutes</p>
+            <p><strong>Total Questions:</strong> <span id="instructionQuestions">30</span></p>
+        </div>
+
+        <p>1. Read every question carefully before selecting an answer.</p>
+        <p>2. Select one correct option for each question.</p>
+        <p>3. You can move between questions using Previous and Next.</p>
+        <p>4. Use the question palette to jump directly to a question.</p>
+        <p>5. You can mark questions for review.</p>
+        <p>6. Do not switch tabs during the examination.</p>
+        <p>7. Keep your face visible to the webcam.</p>
+        <p>8. Your exam will be submitted automatically when the timer reaches zero.</p>
+
+        <button onclick="startExam()">Start Exam</button>
     </div>
 
-    <div class="exam-card" id="examCard">
+    <!-- WEBCAM SECTION -->
+    <div class="card" id="webcamBox">
+        <h2>Live Exam Monitoring</h2>
+
+        <video id="examCamera" autoplay muted playsinline></video>
+
+        <p id="cameraStatus">Camera not started</p>
+        <p id="faceStatus">Face detection waiting...</p>
+        <p id="warningDisplay"></p>
+    </div>
+
+    <!-- EXAM SECTION -->
+    <div class="card" id="examCard">
 
         <h2 id="examTitle">Computer Science Examination</h2>
-<p id="examDetails">Total Questions: 30 | Duration: 60 Minutes</p>
 
-        <hr>
+        <p id="examDetails">Answer all the questions.</p>
 
-        <div class="progress" id="progress"></div>
+        <div id="progress">
+            <div id="progressBar"></div>
+        </div>
 
-        <div class="question" id="question"></div>
+        <p id="question"></p>
 
         <div id="options"></div>
 
-        <div class="buttons">
-            <button id="prevBtn" onclick="previousQuestion()">
-                Previous
-            </button>
+        <p id="answerCount"></p>
 
-            <button id="nextBtn" onclick="nextQuestion()">
-                Next
-            </button>
+        <h3>Question Palette</h3>
 
-            <button class="submit-btn" onclick="submitExam()">
-                Submit Exam
-            </button>
+        <div class="palette-legend">
+            <div class="legend-item">
+                <span class="legend-color answered-color"></span>
+                Answered
+            </div>
+
+            <div class="legend-item">
+                <span class="legend-color not-answered-color"></span>
+                Not Answered
+            </div>
+
+            <div class="legend-item">
+                <span class="legend-color review-color"></span>
+                Marked for Review
+            </div>
+        </div>
+
+        <div id="questionPalette"></div>
+
+        <button id="reviewButton" onclick="toggleReview()">
+            Mark for Review
+        </button>
+
+        <div class="navigation">
+            <button onclick="previousQuestion()">Previous</button>
+            <button onclick="nextQuestion()">Next</button>
+        </div>
+
+        <div style="text-align:center; margin-top:20px;">
+            <button onclick="submitExam(false)">Submit Exam</button>
         </div>
 
     </div>
 
-    <div class="result" id="result">
-        <h2>Examination Completed!</h2>
-        <h3 id="score"></h3>
-        <p id="percentage"></p>
-        <p id="message"></p>
-        <p id="resultWarnings"></p>
-        <button onclick="window.location.href='dashboard.html'">
-            Back to Dashboard
-        </button>
+    <!-- RESULT SECTION -->
+    <div class="card" id="result">
+
+        <h2>Exam Completed!</h2>
+
+        <div class="result-details">
+            <h3 id="score"></h3>
+            <h3 id="percentage"></h3>
+            <p id="message"></p>
+            <p id="warnings"></p>
+        </div>
+
     </div>
 
 </div>
 
-<footer>
-    Smart Exam Monitoring System &copy; 2026
-</footer>
-<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-
 <script>
-    let cameraStream = null;
-    let warningCount = 0;
-    let isLookingAway = false;
+    // ===============================
+// EXAM DATA
+// ===============================
 
-async function startExamCamera() {
-    const status = document.getElementById("cameraStatus");
-    const video = document.getElementById("examCamera");
+let selectedExam = null;
+let questions = [];
 
-    try {
-        cameraStream = await navigator.mediaDevices.getUserMedia({
-            video: true,
-            audio: false
-        });
+let currentQuestion = 0;
+let answers = {};
+let markedForReview = {};
 
-        video.srcObject = cameraStream;
-        await video.play();
-        const modelsLoaded = await loadExamFaceModels();
+let timeLeft = 60 * 60;
+let timerInterval = null;
 
-        if (modelsLoaded) {
-            detectExamFace();
-        }
-        cameraStream.getVideoTracks()[0].addEventListener("ended", function() {
-    status.innerText = "WARNING: Webcam disconnected!";
-    status.style.color = "red";
-    alert("Warning! Your webcam has been disconnected.");
-});
-        status.innerText = "Webcam is active during the examination.";
-        const cameraTrack = cameraStream.getVideoTracks()[0];
+let examFinished = false;
+let examStarted = false;
 
-cameraTrack.addEventListener("mute", function() {
-    status.innerText = "WARNING: Camera temporarily interrupted!";
-    status.style.color = "red";
-});
+let cameraStream = null;
+let warningCount = 0;
+let lookingAwayCount = 0;
+let lastMonitoringState = "";
 
-cameraTrack.addEventListener("unmute", function() {
-    status.innerText = "Webcam is active during the examination.";
-    status.style.color = "green";
-});
+let faceDetectionInterval = null;
 
-    } catch (error) {
-        status.innerText = "Camera unavailable. Please allow camera access.";
-        status.style.color = "red";
-        console.error("Camera error:", error);
-    }
-}
-async function loadExamFaceModels() {
-    try {
-        await faceapi.nets.tinyFaceDetector.loadFromUri('./models');
-        await faceapi.nets.faceLandmark68Net.loadFromUri('./models');
+const timerElement = document.getElementById("timer");
 
-        console.log("Exam face detection models loaded!");
 
-        return true;
+// ===============================
+// LOAD EXAM FROM LOCAL STORAGE
+// ===============================
 
-    } catch (error) {
-        console.error("Face model loading error:", error);
-        document.getElementById("faceStatus").innerText =
-            "Face detection models could not load.";
-
-        return false;
-    }
-}
-
-async function detectExamFace() {
-    const video = document.getElementById("examCamera");
-    const faceStatus = document.getElementById("faceStatus");
-
-    if (!video.videoWidth) {
-        requestAnimationFrame(detectExamFace);
-        return;
-    }
-
-    const detections = await faceapi.detectAllFaces(
-    video,
-    new faceapi.TinyFaceDetectorOptions()
-).withFaceLandmarks();
-
-    if (detections.length === 0) {
-        faceStatus.innerText = "WARNING: No face detected!";
-        faceStatus.style.color = "red";
-    } else if (detections.length === 1) {
-
-        faceStatus.innerText = "One face detected.";
-        faceStatus.style.color = "green";
-        const points = detections[0].landmarks.positions;
-
-const leftEye = (points[36].x + points[39].x) / 2;
-const rightEye = (points[42].x + points[45].x) / 2;
-const nose = points[30].x;
-
-const eyeCenter = (leftEye + rightEye) / 2;
-const eyeDistance = rightEye - leftEye;
-
-if (nose < eyeCenter - eyeDistance * 0.18 ||
-    nose > eyeCenter + eyeDistance * 0.18) {
-
-    if (!isLookingAway) {
-        warningCount++;
-        document.getElementById("warningDisplay").innerText =
-    "Warnings: " + warningCount;
-        isLookingAway = true;
-    }
-
-    faceStatus.innerText = "WARNING: Please look at the screen!";
-    faceStatus.style.color = "red";
-
-} else {
-    isLookingAway = false;
-}
-    } else {
-        faceStatus.innerText = "WARNING: Multiple faces detected!";
-        faceStatus.style.color = "red";
-    }
-
-    requestAnimationFrame(detectExamFace);
-}
-document.addEventListener("visibilitychange", function() {
-
-    if (document.hidden) {
-        alert("WARNING! You have switched away from the examination tab.");
-
-    }
-
-});
-startExamCamera();
-
-const defaultQuestions = [
-
-{
-q: "1. What does CPU stand for?",
-o: ["Central Processing Unit", "Computer Personal Unit", "Central Program Utility", "Control Processing User"],
-a: 0
-},
-
-{
-q: "2. Which language is used for web page structure?",
-o: ["Python", "HTML", "Java", "C++"],
-a: 1
-},
-
-{
-q: "3. Which of the following is an operating system?",
-o: ["MS Word", "Google Chrome", "Windows", "HTML"],
-a: 2
-},
-
-{
-q: "4. What is the brain of a computer?",
-o: ["Monitor", "CPU", "Keyboard", "Mouse"],
-a: 1
-},
-
-{
-q: "5. Which memory is volatile?",
-o: ["ROM", "Hard Disk", "RAM", "DVD"],
-a: 2
-},
-
-{
-q: "6. What does URL stand for?",
-o: ["Uniform Resource Locator", "Universal Record Link", "User Resource Location", "Uniform Reference Link"],
-a: 0
-},
-
-{
-q: "7. Which data structure follows FIFO?",
-o: ["Stack", "Queue", "Tree", "Graph"],
-a: 1
-},
-
-{
-q: "8. Which data structure follows LIFO?",
-o: ["Queue", "Array", "Stack", "Linked List"],
-a: 2
-},
-
-{
-q: "9. Which symbol is used for comments in JavaScript (single line)?",
-o: ["//", "#", "<!--", "**"],
-a: 0
-},
-
-{
-q: "10. Which of these is a programming language?",
-o: ["HTML", "CSS", "Python", "HTTP"],
-a: 2
-},
-
-{
-q: "11. What does SQL stand for?",
-o: ["Structured Query Language", "Simple Question Language", "System Query Link", "Standard Quick Language"],
-a: 0
-},
-
-{
-q: "12. Which device is used to input text?",
-o: ["Monitor", "Keyboard", "Speaker", "Printer"],
-a: 1
-},
-
-{
-q: "13. Which number system uses only 0 and 1?",
-o: ["Decimal", "Octal", "Binary", "Hexadecimal"],
-a: 2
-},
-
-{
-q: "14. Which protocol is used to access web pages?",
-o: ["HTTP", "FTP", "SMTP", "POP3"],
-a: 0
-},
-
-{
-q: "15. What is the full form of RAM?",
-o: ["Read Access Memory", "Random Access Memory", "Run Active Memory", "Remote Access Module"],
-a: 1
-},
-
-{
-q: "16. Which of these is a database management system?",
-o: ["MySQL", "Windows", "Chrome", "Photoshop"],
-a: 0
-},
-
-{
-q: "17. Which tag creates a hyperlink in HTML?",
-o: ["<p>", "<h1>", "<a>", "<br>"],
-a: 2
-},
-
-{
-q: "18. Which CSS property changes text color?",
-o: ["background", "color", "font-size", "margin"],
-a: 1
-},
-
-{
-q: "19. Which operator is used for equality comparison in JavaScript?",
-o: ["=", "===", "+", "*"],
-a: 1
-},
-
-{
-q: "20. What is the extension of a JavaScript file?",
-o: [".html", ".css", ".js", ".java"],
-a: 2
-},
-
-{
-q: "21. Which of these is an output device?",
-o: ["Mouse", "Keyboard", "Scanner", "Monitor"],
-a: 3
-},
-
-{
-q: "22. What does LAN stand for?",
-o: ["Local Area Network", "Large Access Network", "Long Area Node", "Local Active Number"],
-a: 0
-},
-
-{
-q: "23. Which company developed Java?",
-o: ["Microsoft", "Sun Microsystems", "Apple", "IBM"],
-a: 1
-},
-
-{
-q: "24. Which of these is used for version control?",
-o: ["Git", "HTML", "CSS", "Excel"],
-a: 0
-},
-
-{
-q: "25. Which loop executes at least once?",
-o: ["for", "while", "do-while", "foreach"],
-a: 2
-},
-
-{
-q: "26. What does GUI stand for?",
-o: ["General User Internet", "Graphical User Interface", "Global Utility Interface", "Graphic Universal Input"],
-a: 1
-},
-
-{
-q: "27. Which key is commonly used to refresh a webpage?",
-o: ["F1", "F2", "F5", "F12"],
-a: 2
-},
-
-{
-q: "28. Which of these is a cloud storage service?",
-o: ["Google Drive", "Notepad", "Calculator", "Paint"],
-a: 0
-},
-
-{
-q: "29. Which SQL command retrieves data?",
-o: ["INSERT", "DELETE", "SELECT", "UPDATE"],
-a: 2
-},
-
-{
-q: "30. What does WWW stand for?",
-o: ["World Wide Web", "World Web Window", "Wide World Website", "Web World Wide"],
-a: 0
-}
-
-];
-// Get examinations created by the examiner
 const savedExams = JSON.parse(
     localStorage.getItem("examinations") || "[]"
 );
 
-// Use the latest examination created by the examiner
-const selectedExam = savedExams.length > 0
-    ? savedExams[savedExams.length - 1]
-    : null;
-    // Get examination details entered by the examiner
+if (
+    savedExams.length > 0 &&
+    Array.isArray(savedExams[savedExams.length - 1].questions) &&
+    savedExams[savedExams.length - 1].questions.length > 0
+) {
+
+    selectedExam = savedExams[savedExams.length - 1];
+
+    questions = (selectedExam.questions || []).map(q => {
+
+        return {
+            question: q.question,
+            options: [
+                q.optionA,
+                q.optionB,
+                q.optionC,
+                q.optionD
+            ],
+            correctAnswer: "ABCD".indexOf(
+                String(q.correctAnswer || "").toUpperCase()
+            )
+        };
+
+    });
+
+} else {
+
+    // DEFAULT QUESTIONS
+
+    questions = [
+        {
+            question: "What does HTML stand for?",
+            options: [
+                "Hyper Text Markup Language",
+                "High Text Machine Language",
+                "Hyper Tool Multi Language",
+                "Home Text Markup Language"
+            ],
+            correctAnswer: 0
+        },
+        {
+            question: "Which language is used for styling web pages?",
+            options: [
+                "HTML",
+                "CSS",
+                "Python",
+                "Java"
+            ],
+            correctAnswer: 1
+        },
+        {
+            question: "Which of the following is a programming language?",
+            options: [
+                "HTTP",
+                "CSS",
+                "Java",
+                "HTML"
+            ],
+            correctAnswer: 2
+        },
+        {
+            question: "What does CPU stand for?",
+            options: [
+                "Central Processing Unit",
+                "Computer Personal Unit",
+                "Central Program Utility",
+                "Control Processing User"
+            ],
+            correctAnswer: 0
+        },
+        {
+            question: "Which data structure follows FIFO?",
+            options: [
+                "Stack",
+                "Queue",
+                "Tree",
+                "Graph"
+            ],
+            correctAnswer: 1
+        },
+        {
+            question: "Which language is mainly used for web development?",
+            options: [
+                "JavaScript",
+                "C",
+                "Assembly",
+                "COBOL"
+            ],
+            correctAnswer: 0
+        },
+        {
+            question: "Which symbol is used for comments in JavaScript (single line)?",
+            options: [
+                "<!-- -->",
+                "//",
+                "#",
+                "**"
+            ],
+            correctAnswer: 1
+        },
+        {
+            question: "Which company developed Java?",
+            options: [
+                "Microsoft",
+                "Apple",
+                "Sun Microsystems",
+                "Google"
+            ],
+            correctAnswer: 2
+        },
+        {
+            question: "Which of these is an operating system?",
+            options: [
+                "Oracle",
+                "Linux",
+                "MySQL",
+                "HTML"
+            ],
+            correctAnswer: 1
+        },
+        {
+            question: "What is the full form of RAM?",
+            options: [
+                "Read Access Memory",
+                "Random Access Memory",
+                "Run Access Memory",
+                "Rapid Action Memory"
+            ],
+            correctAnswer: 1
+        },
+        {
+            question: "Which database language is used to retrieve data?",
+            options: [
+                "HTML",
+                "SQL",
+                "CSS",
+                "XML"
+            ],
+            correctAnswer: 1
+        },
+        {
+            question: "Which of the following is not a programming language?",
+            options: [
+                "Python",
+                "Java",
+                "HTML",
+                "C++"
+            ],
+            correctAnswer: 2
+        },
+        {
+            question: "Which operator is used for equality in JavaScript?",
+            options: [
+                "=",
+                "==",
+                "+",
+                "%"
+            ],
+            correctAnswer: 1
+        },
+        {
+            question: "Which data structure follows LIFO?",
+            options: [
+                "Queue",
+                "Array",
+                "Stack",
+                "Linked List"
+            ],
+            correctAnswer: 2
+        },
+        {
+            question: "What does URL stand for?",
+            options: [
+                "Uniform Resource Locator",
+                "Universal Reference Link",
+                "Unified Resource Link",
+                "Uniform Read Locator"
+            ],
+            correctAnswer: 0
+        },
+        {
+            question: "Which protocol is used for secure web communication?",
+            options: [
+                "HTTP",
+                "FTP",
+                "HTTPS",
+                "SMTP"
+            ],
+            correctAnswer: 2
+        },
+        {
+            question: "Which of these is a primary key?",
+            options: [
+                "A field that uniquely identifies a record",
+                "A duplicate field",
+                "A blank field",
+                "A password"
+            ],
+            correctAnswer: 0
+        },
+        {
+            question: "Which company developed Python?",
+            options: [
+                "Microsoft",
+                "Guido van Rossum created Python",
+                "Apple",
+                "IBM"
+            ],
+            correctAnswer: 1
+        },
+        {
+            question: "What is the brain of the computer?",
+            options: [
+                "Monitor",
+                "Keyboard",
+                "CPU",
+                "Mouse"
+            ],
+            correctAnswer: 2
+        },
+        {
+            question: "Which HTML tag is used to create a hyperlink?",
+            options: [
+                "<link>",
+                "<a>",
+                "<href>",
+                "<url>"
+            ],
+            correctAnswer: 1
+        },
+        {
+            question: "Which of the following is an input device?",
+            options: [
+                "Monitor",
+                "Printer",
+                "Keyboard",
+                "Speaker"
+            ],
+            correctAnswer: 2
+        },
+        {
+            question: "Which language is used to query relational databases?",
+            options: [
+                "SQL",
+                "CSS",
+                "JavaScript",
+                "PHP"
+            ],
+            correctAnswer: 0
+        },
+        {
+            question: "What does IP stand for?",
+            options: [
+                "Internet Protocol",
+                "Internal Program",
+                "Input Process",
+                "Internet Program"
+            ],
+            correctAnswer: 0
+        },
+        {
+            question: "Which of these is a cloud computing platform?",
+            options: [
+                "AWS",
+                "HTML",
+                "CSS",
+                "Notepad"
+            ],
+            correctAnswer: 0
+        },
+        {
+            question: "Which loop executes at least once?",
+            options: [
+                "for",
+                "while",
+                "do-while",
+                "foreach"
+            ],
+            correctAnswer: 2
+        },
+        {
+            question: "Which one is an example of a web browser?",
+            options: [
+                "Windows",
+                "Google Chrome",
+                "Linux",
+                "MySQL"
+            ],
+            correctAnswer: 1
+        },
+        {
+            question: "What is the extension of a JavaScript file?",
+            options: [
+                ".html",
+                ".css",
+                ".js",
+                ".java"
+            ],
+            correctAnswer: 2
+        },
+        {
+            question: "Which of the following is a non-relational database?",
+            options: [
+                "MySQL",
+                "Oracle",
+                "MongoDB",
+                "PostgreSQL"
+            ],
+            correctAnswer: 2
+        },
+        {
+            question: "Which HTML tag is used for the largest heading?",
+            options: [
+                "<h6>",
+                "<head>",
+                "<h1>",
+                "<heading>"
+            ],
+            correctAnswer: 2
+        },
+        {
+            question: "Which unit is used to measure computer memory?",
+            options: [
+                "Kilogram",
+                "Byte",
+                "Meter",
+                "Second"
+            ],
+            correctAnswer: 1
+        }
+    ];
+
+}
+
+
+// ===============================
+// EXAM DETAILS
+// ===============================
+
 const examTitle = selectedExam
-    ? selectedExam.examName
+    ? selectedExam.title
     : "Computer Science Examination";
 
 const examDuration = selectedExam
     ? Number(selectedExam.duration)
     : 60;
 
-const examTotalQuestions = selectedExam
-    ? Number(selectedExam.totalQuestions)
-    : 30;
+document.getElementById("instructionExamTitle").textContent =
+    examTitle;
 
-// Display examination details
-document.getElementById("examTitle").innerText = examTitle;
+document.getElementById("instructionDuration").textContent =
+    examDuration;
 
-document.getElementById("examDetails").innerText =
-    "Total Questions: " + examTotalQuestions +
-    " | Duration: " + examDuration + " Minutes";
+document.getElementById("instructionQuestions").textContent =
+    questions.length;
 
-// Convert examiner questions into student exam format
-const questions = selectedExam && selectedExam.questions &&
-    selectedExam.questions.length > 0
-    ? selectedExam.questions.map((q, index) => ({
-        q: (index + 1) + ". " + q.question,
-        o: [
-            q.optionA,
-            q.optionB,
-            q.optionC,
-            q.optionD
-        ],
-        a: ["A", "B", "C", "D"].indexOf(q.correctAnswer)
-    }))
-    : defaultQuestions;
+document.getElementById("examTitle").textContent =
+    examTitle;
 
-let currentQuestion = 0;
-let answers = {};
-let timeLeft = examDuration * 60;
-let examFinished = false;
+document.getElementById("examDetails").textContent =
+    "Total Questions: " + questions.length;
+
+
+// ===============================
+// START EXAM
+// ===============================
+
+function startExam() {
+
+    if (questions.length === 0) {
+        alert("No questions available for this examination.");
+        return;
+    }
+
+    examStarted = true;
+
+    document.getElementById("instructionsCard").style.display = "none";
+
+    document.getElementById("webcamBox").style.display = "block";
+
+    document.getElementById("examCard").style.display = "block";
+
+    timeLeft = examDuration * 60;
+
+    displayQuestion();
+
+    startTimer();
+
+    startCamera();
+
+}
+
+
+// ===============================
+// DISPLAY QUESTION
+// ===============================
 
 function displayQuestion() {
 
+    if (currentQuestion < 0 || currentQuestion >= questions.length) {
+        return;
+    }
+
     const q = questions[currentQuestion];
 
-    document.getElementById("progress").innerText =
-        "Question " + (currentQuestion + 1) +
-        " of " + questions.length;
-
-    document.getElementById("question").innerText = q.q;
+    document.getElementById("question").textContent =
+        "Question " + (currentQuestion + 1) + ": " + q.question;
 
     const optionsDiv = document.getElementById("options");
+
     optionsDiv.innerHTML = "";
 
-    q.o.forEach((option, index) => {
+    q.options.forEach((option, index) => {
 
         const label = document.createElement("label");
+
         label.className = "option";
 
         const radio = document.createElement("input");
+
         radio.type = "radio";
+
         radio.name = "answer";
+
         radio.value = index;
 
-        if (answers[currentQuestion] === index) {
-            radio.checked = true;
-        }
+        radio.checked = answers[currentQuestion] === index;
 
-        radio.addEventListener("change", function() {
+        radio.addEventListener("change", function () {
+
             answers[currentQuestion] = index;
+
+            updateQuestionPalette();
+
         });
 
         label.appendChild(radio);
-        label.appendChild(document.createTextNode(
-            String.fromCharCode(65 + index) + ". " + option
-        ));
+
+        label.appendChild(
+            document.createTextNode(option)
+        );
 
         optionsDiv.appendChild(label);
 
     });
 
-    document.getElementById("prevBtn").disabled =
-        currentQuestion === 0;
+    const progress =
+        ((currentQuestion + 1) / questions.length) * 100;
 
-    document.getElementById("nextBtn").disabled =
-        currentQuestion === questions.length - 1;
+    document.getElementById("progressBar").style.width =
+        progress + "%";
+
+    document.getElementById("reviewButton").textContent =
+        markedForReview[currentQuestion]
+            ? "Remove Review Mark"
+            : "Mark for Review";
+
+    updateQuestionPalette();
 
 }
+
+
+// ===============================
+// QUESTION PALETTE
+// ===============================
+
+function updateQuestionPalette() {
+
+    const palette = document.getElementById("questionPalette");
+
+    palette.innerHTML = "";
+
+    questions.forEach((q, index) => {
+
+        const button = document.createElement("button");
+
+        button.textContent = index + 1;
+
+        button.className = "palette-btn";
+
+        if (answers[index] !== undefined) {
+            button.classList.add("answered");
+        }
+
+        if (markedForReview[index]) {
+            button.classList.add("review");
+        }
+
+        if (index === currentQuestion) {
+            button.classList.add("current");
+        }
+
+        button.addEventListener("click", function () {
+
+            currentQuestion = index;
+
+            displayQuestion();
+
+        });
+
+        palette.appendChild(button);
+
+    });
+
+    const answeredCount = Object.keys(answers).length;
+
+    const reviewCount = Object.keys(markedForReview).filter(
+        key => markedForReview[key]
+    ).length;
+
+    const unansweredCount = questions.length - answeredCount;
+
+    document.getElementById("answerCount").textContent =
+        "Answered: " + answeredCount +
+        " | Unanswered: " + unansweredCount +
+        " | Review: " + reviewCount;
+
+}
+
+
+// ===============================
+// MARK FOR REVIEW
+// ===============================
+
+function toggleReview() {
+
+    markedForReview[currentQuestion] =
+        !markedForReview[currentQuestion];
+
+    displayQuestion();
+
+}
+
+
+// ===============================
+// NEXT QUESTION
+// ===============================
 
 function nextQuestion() {
 
     if (currentQuestion < questions.length - 1) {
+
         currentQuestion++;
+
         displayQuestion();
+
+    } else {
+
+        alert("You are on the last question.");
+
     }
 
 }
+
+
+// ===============================
+// PREVIOUS QUESTION
+// ===============================
 
 function previousQuestion() {
 
     if (currentQuestion > 0) {
+
         currentQuestion--;
+
         displayQuestion();
+
+    } else {
+
+        alert("You are on the first question.");
+
     }
 
 }
 
-function submitExam() {
+
+// ===============================
+// WEBCAM START
+// ===============================
+
+async function startCamera() {
+
+    const video = document.getElementById("examCamera");
+
+    const cameraStatus = document.getElementById("cameraStatus");
+
+    try {
+
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false
+        });
+
+        video.srcObject = cameraStream;
+
+        cameraStatus.textContent = "Camera is active";
+
+        cameraStatus.style.color = "green";
+
+        video.addEventListener("loadedmetadata", function () {
+
+            video.play();
+
+        });
+
+        cameraStream.getVideoTracks().forEach(track => {
+
+            track.addEventListener("ended", function () {
+
+                cameraStatus.textContent = "Camera disconnected!";
+
+                cameraStatus.style.color = "red";
+
+                warningCount++;
+
+                updateWarnings();
+
+            });
+
+            track.addEventListener("mute", function () {
+
+                cameraStatus.textContent = "Camera muted";
+
+                warningCount++;
+
+                updateWarnings();
+
+            });
+
+            track.addEventListener("unmute", function () {
+
+                cameraStatus.textContent = "Camera is active";
+
+            });
+
+        });
+
+        loadFaceModels();
+
+    } catch (error) {
+
+        cameraStatus.textContent =
+            "Camera access denied or unavailable.";
+
+        cameraStatus.style.color = "red";
+
+        warningCount++;
+
+        updateWarnings();
+
+    }
+
+}
+
+
+// ===============================
+// LOAD FACE DETECTION MODELS
+// ===============================
+
+async function loadFaceModels() {
+    try {
+        await faceapi.nets.tinyFaceDetector.loadFromUri("./models");
+
+        await faceapi.nets.faceLandmark68Net.loadFromUri("./models");
+
+        document.getElementById("faceStatus").textContent =
+            "Face detection is ready";
+
+        detectExamFace();
+
+    } catch (error) {
+        console.error("Model loading error:", error);
+
+        document.getElementById("faceStatus").textContent =
+            "Face detection models failed to load. Check console.";
+    }
+}
+
+
+// ===============================
+// FACE DETECTION
+// ===============================
+
+async function detectExamFace() {
+
+    const video = document.getElementById("examCamera");
+    const faceStatus = document.getElementById("faceStatus");
 
     if (examFinished) return;
 
-    const unanswered = questions.length -
-        Object.keys(answers).length;
+    try {
 
-    if (unanswered > 0 && timeLeft > 0) {
-        const confirmSubmit = confirm(
-            "You have " + unanswered +
-            " unanswered questions. Do you want to submit?"
-        );
+        if (video.readyState >= 2) {
 
-        if (!confirmSubmit) return;
+            const detections = await faceapi
+                .detectAllFaces(
+                    video,
+                    new faceapi.TinyFaceDetectorOptions()
+                )
+                .withFaceLandmarks();
+
+            let currentState = "";
+
+            if (detections.length === 0) {
+
+                faceStatus.textContent = "No face detected!";
+                faceStatus.style.color = "red";
+
+                currentState = "no-face";
+
+            } else if (detections.length > 1) {
+
+                faceStatus.textContent = "Multiple faces detected!";
+                faceStatus.style.color = "red";
+
+                currentState = "multiple-faces";
+
+            } else {
+
+                const detection = detections[0];
+
+                const box = detection.detection.box;
+                const nose = detection.landmarks.positions[30];
+
+                const faceCenter = box.x + box.width / 2;
+
+                const noseDifference =
+                    Math.abs(nose.x - faceCenter) / box.width;
+
+                if (noseDifference > 0.12) {
+
+                    faceStatus.textContent =
+                        "Warning! Student may be looking away!";
+
+                    faceStatus.style.color = "red";
+
+                    currentState = "looking-away";
+
+                } else {
+
+                    faceStatus.textContent = "1 face detected";
+                    faceStatus.style.color = "green";
+
+                    currentState = "one-face";
+
+                }
+            }
+
+            if (
+                currentState !== "one-face" &&
+                currentState !== lastMonitoringState
+            ) {
+
+                warningCount++;
+                updateWarnings();
+
+            }
+
+            lastMonitoringState = currentState;
+        }
+
+    } catch (error) {
+
+        console.error("Face detection error:", error);
+
+    }
+
+    if (!examFinished) {
+        faceDetectionInterval = setTimeout(detectExamFace, 1000);
+    }
+}
+
+
+// ===============================
+// UPDATE WARNING COUNT
+// ===============================
+
+function updateWarnings() {
+
+    document.getElementById("warningDisplay").textContent =
+        "Monitoring Warnings: " + warningCount;
+
+}
+// ===============================
+// EXAM TIMER
+// ===============================
+
+function startTimer() {
+
+    clearInterval(timerInterval);
+
+    updateTimerDisplay();
+
+    timerInterval = setInterval(function () {
+
+        if (examFinished) {
+            clearInterval(timerInterval);
+            return;
+        }
+
+        timeLeft--;
+
+        updateTimerDisplay();
+
+        if (timeLeft <= 0) {
+
+            clearInterval(timerInterval);
+
+            alert("Time is over! Your exam will be submitted automatically.");
+
+            submitExam(true);
+
+        }
+
+    }, 1000);
+
+}
+
+
+// ===============================
+// UPDATE TIMER DISPLAY
+// ===============================
+
+function updateTimerDisplay() {
+
+    const minutes = Math.floor(timeLeft / 60);
+
+    const seconds = timeLeft % 60;
+
+    timerElement.textContent =
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(seconds).padStart(2, "0");
+
+    if (timeLeft <= 300) {
+
+        timerElement.style.color = "red";
+
+    }
+
+}
+
+
+// ===============================
+// SUBMIT EXAM
+// ===============================
+
+function submitExam(autoSubmit = false) {
+
+    if (examFinished) {
+        return;
+    }
+
+    const unansweredCount =
+        questions.length - Object.keys(answers).length;
+
+    if (!autoSubmit) {
+
+        if (unansweredCount > 0) {
+
+            const confirmUnanswered = confirm(
+                "You have " + unansweredCount +
+                " unanswered questions. Do you want to submit?"
+            );
+
+            if (!confirmUnanswered) {
+                return;
+            }
+
+        } else {
+
+            const confirmSubmit = confirm(
+                "Are you sure you want to submit your exam?"
+            );
+
+            if (!confirmSubmit) {
+                return;
+            }
+
+        }
+
     }
 
     examFinished = true;
-    let completedAttempts =
-    Number(localStorage.getItem("completedAttempts") || 0);
 
-completedAttempts++;
+    clearInterval(timerInterval);
 
-localStorage.setItem("completedAttempts", completedAttempts);
+    clearTimeout(faceDetectionInterval);
 
-clearInterval(timerInterval);
+    // STOP WEBCAM
 
-// Stop webcam after exam submission
-if (cameraStream) {
-    cameraStream.getTracks().forEach(track => track.stop());
-    cameraStream = null;
-}
+    if (cameraStream) {
 
-document.getElementById("webcamBox").style.display = "none";
+        cameraStream.getTracks().forEach(track => {
+            track.stop();
+        });
 
-    let correct = 0;
+    }
 
-    questions.forEach((q, index) => {
-        if (answers[index] === q.a) {
-            correct++;
+    // CALCULATE SCORE
+
+    let score = 0;
+
+    questions.forEach((question, index) => {
+
+        if (answers[index] === question.correctAnswer) {
+
+            score++;
+
         }
+
     });
 
-    const percentage = (correct / questions.length) * 100;
+    const totalQuestions = questions.length;
+
+    const percentage =
+        totalQuestions > 0
+            ? ((score / totalQuestions) * 100).toFixed(2)
+            : "0.00";
+
+    // RESULT MESSAGE
+
+    let resultMessage = "";
+
+    if (percentage >= 80) {
+
+        resultMessage = "Excellent performance!";
+
+    } else if (percentage >= 60) {
+
+        resultMessage = "Good job! Keep improving.";
+
+    } else if (percentage >= 40) {
+
+        resultMessage = "You passed. Keep practising.";
+
+    } else {
+
+        resultMessage = "Keep learning and try again.";
+
+    }
+
+    // DISPLAY RESULT
+
+    document.getElementById("instructionsCard").style.display =
+        "none";
+
+    document.getElementById("webcamBox").style.display =
+        "none";
+
+    document.getElementById("examCard").style.display =
+        "none";
+
+    document.getElementById("result").style.display =
+        "block";
+
+    document.getElementById("score").textContent =
+        "Your Score: " + score + " / " + totalQuestions;
+
+    document.getElementById("percentage").textContent =
+        "Percentage: " + percentage + "%";
+
+    document.getElementById("message").textContent =
+        resultMessage;
+
+    document.getElementById("warnings").textContent =
+        "Monitoring Warnings: " + warningCount;
+
+    timerElement.textContent = "Submitted";
+
+    // SAVE EXAM RESULT
+
+    const resultDetails = {
+
+        examName: examTitle,
+
+        score: score,
+
+        totalQuestions: totalQuestions,
+
+        percentage: percentage,
+
+        warnings: warningCount,
+
+        date: new Date().toLocaleString(),
+
+        answers: answers,
+
+        markedForReview: markedForReview
+
+    };
+
+    // SAVE COMPLETED ATTEMPTS
+
+    let completedAttempts = JSON.parse(
+        localStorage.getItem("completedAttempts") || "0"
+    );
+
+    completedAttempts++;
+
+    localStorage.setItem(
+        "completedAttempts",
+        JSON.stringify(completedAttempts)
+    );
+
+    // SAVE EXAM SCORES
+
     let examScores = JSON.parse(
-    localStorage.getItem("examScores") || "[]"
-);
+        localStorage.getItem("examScores") || "[]"
+    );
 
-examScores.push(Number(percentage.toFixed(2)));
+    examScores.push(resultDetails);
 
-localStorage.setItem("examScores", JSON.stringify(examScores));
+    localStorage.setItem(
+        "examScores",
+        JSON.stringify(examScores)
+    );
 
-// Save examination result
-let examResults = JSON.parse(
-    localStorage.getItem("examResults") || "[]"
-);
+    // SAVE EXAM RESULTS
 
-const resultDetails = {
-    student: "Student",
-    examName: "Computer Science Examination",
-    score: correct + " / " + questions.length,
-    percentage: percentage.toFixed(2) + "%",
-    warnings: warningCount,
-    status: "Completed"
-};
+    let examResults = JSON.parse(
+        localStorage.getItem("examResults") || "[]"
+    );
 
-examResults.push(resultDetails);
+    examResults.push(resultDetails);
 
-localStorage.setItem(
-    "examResults",
-    JSON.stringify(examResults)
-);
+    localStorage.setItem(
+        "examResults",
+        JSON.stringify(examResults)
+    );
 
-    document.getElementById("examCard").style.display = "none";
-    document.getElementById("result").style.display = "block";
+    console.log("Exam submitted successfully.");
 
-    document.getElementById("score").innerText =
-        "Your Score: " + correct + " / " + questions.length;
-
-    document.getElementById("percentage").innerText =
-        "Percentage: " + percentage.toFixed(2) + "%";
-
-    document.getElementById("message").innerText =
-        "Unanswered Questions: " + unanswered;
-    document.getElementById("resultWarnings").innerText =
-    "Warnings During Exam: " + warningCount;
-
-    document.getElementById("timer").innerText = "Submitted";
+    console.log("Exam Result:", resultDetails);
 
 }
 
-const timerInterval = setInterval(function() {
 
-    if (examFinished) {
-        clearInterval(timerInterval);
-        return;
+// ===============================
+// TAB SWITCH DETECTION
+// ===============================
+
+document.addEventListener("visibilitychange", function () {
+
+    if (
+        document.hidden &&
+        examStarted &&
+        !examFinished
+    ) {
+
+        warningCount++;
+
+        updateWarnings();
+
+        alert(
+            "Warning! Switching tabs during the examination is not allowed."
+        );
+
     }
 
-    let minutes = Math.floor(timeLeft / 60);
-    let seconds = timeLeft % 60;
+});
 
-    document.getElementById("timer").innerText =
-        String(minutes).padStart(2, "0") + ":" +
-        String(seconds).padStart(2, "0");
 
-    if (timeLeft <= 0) {
-        clearInterval(timerInterval);
-        submitExam();
-        return;
-    }
+// ===============================
+// INITIAL PAGE SETUP
+// ===============================
 
-    timeLeft--;
+document.addEventListener("DOMContentLoaded", function () {
 
-}, 1000);
+    timerElement.textContent =
+        String(examDuration).padStart(2, "0") + ":00";
 
-displayQuestion();
-
+});
 </script>
-
-
 </body>
 </html>

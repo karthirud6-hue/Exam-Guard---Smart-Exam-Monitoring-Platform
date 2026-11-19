@@ -1,21 +1,21 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-    const form = document.querySelector("form");
+    const form = document.getElementById("loginForm");
 
     form.addEventListener("submit", function (event) {
 
         event.preventDefault();
 
-        const username = document.querySelector('input[type="text"]').value.trim();
+        const email = document.getElementById("email").value.trim().toLowerCase();
 
-        const password = document.querySelector('input[type="password"]').value;
+        const password = document.getElementById("password").value;
 
         const role = document.getElementById("role").value;
 
         // Student login
         if (
             role === "student" &&
-            username === "student" &&
+            email === "student@example.com" &&
             password === "12345"
         ) {
             alert("Login Successful! Welcome, Student!");
@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Examiner login
         else if (
             role === "examiner" &&
-            username === "examiner" &&
+            email === "examiner@example.com" &&
             password === "12345"
         ) {
             alert("Login Successful! Welcome, Examiner!");
@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Admin login
         else if (
             role === "admin" &&
-            username === "admin" &&
+            email === "admin@example.com" &&
             password === "12345"
         ) {
             alert("Login Successful! Welcome, Admin!");
@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         else {
-            alert("Invalid Username, Password or Role!");
+            alert("Invalid Email, Password or Role!");
         }
 
     });
