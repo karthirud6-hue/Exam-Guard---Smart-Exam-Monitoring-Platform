@@ -339,7 +339,7 @@
 
         <section class="welcome" id="overview">
             <h1>Welcome, Examiner! 👋</h1>
-            <p>Manage examinations and monitor student performance.</p>
+            <p>Create and manage examinations, prepare questions and review student performance.</p>
         </section>
 
         <section>
@@ -357,7 +357,7 @@
                 <div class="card">
                     <div class="card-icon">👨‍🎓</div>
                     <h3>Total Students</h3>
-                    <h2>50</h2>
+                    <h2 id="totalStudents">00</h2>
                 </div>
 
                 <div class="card">
@@ -429,6 +429,13 @@
     function logout() {
         window.location.href = "index.html";
     }
+    // Total Students
+const students = JSON.parse(
+    localStorage.getItem("studentUsers") || "[]"
+);
+
+document.getElementById("totalStudents").innerText =
+    String(students.length).padStart(2, "0");
 
     // Total Examinations
     const examinations = JSON.parse(
