@@ -6,7 +6,7 @@ Exam Guard is a web-based Smart Exam Monitoring Platform designed to make online
 
 The system provides separate interfaces for Admins, Examiners, and Students to manage examinations, monitor exam activities, and track student performance.
 
-It uses webcam-based face detection and head movement monitoring to help identify potentially suspicious activities during online examinations.
+It uses webcam-based face detection and approximate head movement monitoring to help identify potentially suspicious activities during online examinations.
 
 🎯 Objectives
 
@@ -19,17 +19,24 @@ It uses webcam-based face detection and head movement monitoring to help identif
 
 👨‍💼 Admin
 
-- Admin dashboard.
-- Manage users and examiners.
-- Manage examinations.
-- Monitor overall examination activities.
+- Admin dashboard for overall platform monitoring.
+- View total students, examiners, and examinations.
+- Manage student accounts.
+- Manage examiner accounts.
+- View reports and analytics.
+- Monitor overall platform activities.
+- Review examination performance.
 
 👨‍🏫 Examiner
 
+- Dedicated examiner dashboard.
+- View total examinations.
+- View the number of registered students.
+- Track completed examinations.
 - Create and manage examinations.
-- Add and manage questions.
-- View examination results.
-- Manage exam invitations.
+- Add and manage examination questions.
+- View and review examination results.
+- Manage examination activities and invitations.
 
 👨‍🎓 Student
 
@@ -45,7 +52,7 @@ It uses webcam-based face detection and head movement monitoring to help identif
 
 - Webcam-based face detection.
 - Face presence monitoring.
-- Head movement detection.
+- Approximate head movement detection.
 - Warning alerts for potentially suspicious movements.
 
 ⏱️ Examination Features
@@ -64,6 +71,7 @@ It uses webcam-based face detection and head movement monitoring to help identif
 - Face-api.js
 - Browser Webcam API
 - Git and GitHub
+- LocalStorage (for frontend demo data)
 
 📂 Project Structure
 
@@ -107,7 +115,8 @@ Exam-Guard---Smart-Exam-Monitoring-Platform/
 - Webcam access requires user permission.
 - Face detection and head movement monitoring are intended to assist exam supervision.
 - Head movement detection is approximate and should not be treated as definitive proof of malpractice.
-- Some project functionality may depend on backend services and configuration.
+- LocalStorage is currently used for frontend demonstration data.
+- Some project functionality, including authentication and backend data management, may depend on backend services and configuration.
 
 👥 Project Team
 
