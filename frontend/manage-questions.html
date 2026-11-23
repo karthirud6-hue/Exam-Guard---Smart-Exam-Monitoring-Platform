@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Questions | Exam Guard</title>
+    <script src="auth.js"></script>
+    <script>requireRole("examiner");</script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme.css">
+    <script src="theme.js"></script>
+
+    <style>
+        .split {
+            display: grid;
+            grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+            gap: 20px;
+            align-items: start;
+        }
+
+        .split > .card + .card { margin-top: 0; }
+
+        .exam-picker {
+            margin-bottom: 20px;
+        }
+
+        .exam-picker label { margin-top: 0; }
+
+        .form-actions { margin-top: 22px; }
+
+        #message {
+            color: var(--success);
+        }
+
+        #questionList {
+            color: var(--muted);
+            font-size: 14px;
+            margin-top: 14px;
+        }
+
+        /* Built by the page script */
+        .question-card {
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface-2);
+        }
+
+        .question-card + .question-card { margin-top: 12px; }
+
+        .question-card h3 {
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+
+        .question-card p {
+            font-size: 14px;
+            color: var(--text-2);
+            padding: 2px 0;
+        }
+
+        .question-card p:last-child {
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 860px) {
+            .split { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="appbar">
+    <div class="appbar-inner">
+        <div class="brand">
+            <span class="brand-mark"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <span class="brand-name">Exam Guard</span>
+        </div>
+        <span class="appbar-tag"><span class="live-dot"></span><span>Examiner workspace</span></span>
+    </div>
+</header>
+
+<main class="page">
+
+    <div class="page-head">
+        <div>
+            <a class="back-link" href="Examiner.html">← Back to dashboard</a>
+            <h1>Manage Examination Questions</h1>
+            <p>Pick an examination, then add multiple-choice questions to it.</p>
+        </div>
+    </div>
+
+    <div class="card exam-picker">
+        <label for="examSelect">Examination</label>
+        <select id="examSelect" required>
+            <option value="">Select an examination</option>
+        </select>
+    </div>
+
+    <div class="split">
+
+        <div class="card">
+            <h2>Add a question</h2>
+            <p class="card-sub">All fields are required.</p>
+
+            <form id="questionForm">
+
+                <label for="question">Question</label>
+                <input type="text" id="question" placeholder="Type the question" required>
+
+                <div class="form-grid">
+                    <div>
+                        <label for="optionA">Option A</label>
+                        <input type="text" id="optionA" required>
+                    </div>
+                    <div>
+                        <label for="optionB">Option B</label>
+                        <input type="text" id="optionB" required>
+                    </div>
+                    <div>
+                        <label for="optionC">Option C</label>
+                        <input type="text" id="optionC" required>
+                    </div>
+                    <div>
+                        <label for="optionD">Option D</label>
+                        <input type="text" id="optionD" required>
+                    </div>
+                </div>
+
+                <label for="correctAnswer">Correct answer</label>
+                <select id="correctAnswer" required>
+                    <option value="">Select correct answer</option>
+                    <option value="A">Option A</option>
+                    <option value="B">Option B</option>
+                    <option value="C">Option C</option>
+                    <option value="D">Option D</option>
+                </select>
+
+                <div class="form-actions">
+                    <button type="submit">Save Question</button>
+                </div>
+
+            </form>
+
+            <p id="message" class="form-message"></p>
+        </div>
+
+        <div class="card">
+            <h2>Saved questions</h2>
+            <div id="questionList">
+                Select an examination to view its questions.
+            </div>
+        </div>
+
+    </div>
+
+</main>
+
+<footer class="site-footer">
+    Exam Guard © 2026
+</footer>
+
+<script>
+    const examSelect = document.getElementById("examSelect");
+    const questionForm = document.getElementById("questionForm");
+    const questionList = document.getElementById("questionList");
+    const message = document.getElementById("message");
+
+    function getExams() {
+        return JSON.parse(
+            localStorage.getItem("examinations") || "[]"
+        );
+    }
+
+    function displayExams() {
+        const exams = getExams();
+
+        exams.forEach((exam, index) => {
+            const option = document.createElement("option");
+            option.value = index;
+            option.textContent =
+                (exam.examName || exam.name || "Untitled Exam")
+                + " - " + (exam.subject || "");
+            examSelect.appendChild(option);
+        });
+    }
+
+    function displayQuestions() {
+        const exams = getExams();
+        const index = examSelect.value;
+
+        questionList.innerHTML = "";
+
+        if (index === "") {
+            questionList.textContent =
+                "Select an examination to view its questions.";
+            return;
+        }
+
+        const questions = exams[Number(index)].questions || [];
+
+        if (questions.length === 0) {
+            questionList.textContent = "No questions added yet.";
+            return;
+        }
+
+        questions.forEach((q, i) => {
+            const card = document.createElement("div");
+            card.className = "question-card";
+
+            const heading = document.createElement("h3");
+            heading.textContent = (i + 1) + ". " + q.question;
+            card.appendChild(heading);
+
+            ["A", "B", "C", "D"].forEach(letter => {
+                const p = document.createElement("p");
+                p.textContent = letter + ". " + q["option" + letter];
+                card.appendChild(p);
+            });
+
+            const answer = document.createElement("p");
+            answer.textContent =
+                "Correct Answer: Option " + q.correctAnswer;
+            answer.style.color = "green";
+            card.appendChild(answer);
+
+            questionList.appendChild(card);
+        });
+    }
+
+    examSelect.addEventListener("change", function() {
+        message.textContent = "";
+        displayQuestions();
+    });
+
+    questionForm.addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        const index = examSelect.value;
+
+        if (index === "") {
+            alert("Please select an examination first.");
+            return;
+        }
+
+        const exams = getExams();
+        const selectedExam = exams[Number(index)];
+
+        if (!selectedExam) {
+            alert("Examination not found. Please refresh the page.");
+            return;
+        }
+
+        const question = {
+            question: document.getElementById("question").value.trim(),
+            optionA: document.getElementById("optionA").value.trim(),
+            optionB: document.getElementById("optionB").value.trim(),
+            optionC: document.getElementById("optionC").value.trim(),
+            optionD: document.getElementById("optionD").value.trim(),
+            correctAnswer: document.getElementById("correctAnswer").value
+        };
+
+        if (Object.values(question).some(value => !value)) {
+            alert("Please fill in all question details.");
+            return;
+        }
+
+        if (!selectedExam.questions) {
+            selectedExam.questions = [];
+        }
+
+        selectedExam.questions.push(question);
+
+        localStorage.setItem(
+            "examinations",
+            JSON.stringify(exams)
+        );
+
+        questionForm.reset();
+        message.textContent = "Question saved successfully!";
+
+        displayQuestions();
+    });
+
+    displayExams();
+</script>
+
+</body>
+</html>

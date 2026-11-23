@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examination Results | Exam Guard</title>
+    <script src="auth.js"></script>
+    <script>requireRole("examiner", "admin");</script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme.css">
+    <script src="theme.js"></script>
+
+    <style>
+        table { min-width: 680px; }
+
+        /* Score / percentage / warnings columns read better right-aligned */
+        th:nth-child(3), td:nth-child(3),
+        th:nth-child(4), td:nth-child(4),
+        th:nth-child(5), td:nth-child(5) {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        td:first-child { color: var(--text); font-weight: 600; }
+
+        #emptyMessage {
+            margin: 16px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="appbar">
+    <div class="appbar-inner">
+        <div class="brand">
+            <span class="brand-mark"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <span class="brand-name">Exam Guard</span>
+        </div>
+        <span class="appbar-tag"><span class="live-dot"></span><span>Results &amp; reports</span></span>
+    </div>
+</header>
+
+<main class="page">
+
+    <div class="page-head">
+        <div>
+            <a class="back-link" href="#" onclick="window.location.href = ROLE_HOME[getRole()]; return false;">← Back to dashboard</a>
+            <h1>Student Examination Results</h1>
+            <p>View examination scores, monitoring warnings and student performance.</p>
+        </div>
+    </div>
+
+    <section style="margin-bottom: 28px;">
+
+        <h2 class="section-title">Overview</h2>
+
+        <div class="perf-grid">
+
+            <div class="card perf-ring-card">
+                <h3>Average score</h3>
+                <div class="ring-wrap" id="avgRing"></div>
+                <div class="perf-meta">
+                    <div><small>Attempts</small><strong id="perfAttempts">00</strong></div>
+                    <div><small>Pass rate</small><strong id="perfPass">—</strong></div>
+                    <div><small>Warnings</small><strong id="perfWarnings">00</strong></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Recent attempts</h3>
+                <p class="card-sub">Score percentage of the latest attempts — hover a bar for details.</p>
+                <div class="bar-chart" id="recentBars"></div>
+            </div>
+
+        </div>
+
+    </section>
+
+    <div class="card" style="padding: 0; overflow: hidden;">
+
+        <div class="table-container" style="border: none; border-radius: 0;">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Examination</th>
+                        <th>Score</th>
+                        <th>Percentage</th>
+                        <th>Warnings</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody id="resultsBody">
+                </tbody>
+            </table>
+
+        </div>
+
+        <p id="emptyMessage" class="empty">
+            No examination results available yet.
+        </p>
+
+    </div>
+
+</main>
+
+<footer class="site-footer">
+    Exam Guard © 2026
+</footer>
+
+<script>
+    const results = JSON.parse(
+        localStorage.getItem("examResults") || "[]"
+    );
+
+    const resultsBody = document.getElementById("resultsBody");
+    const emptyMessage = document.getElementById("emptyMessage");
+
+    results.forEach(result => {
+        const row = document.createElement("tr");
+
+        [
+            result.student || "Student",
+            result.examName || "Examination",
+            result.score || "0",
+            result.percentage || "0%",
+            result.warnings ?? 0,
+            result.status || "Completed"
+        ].forEach(value => {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+            row.appendChild(cell);
+        });
+
+        resultsBody.appendChild(row);
+    });
+
+    if (results.length > 0) {
+        emptyMessage.style.display = "none";
+    }
+</script>
+
+<script src="charts.js"></script>
+<script>
+    ExamCharts.mountPerformance("examResults");
+    ExamCharts.decoratePercentCells(document.getElementById("resultsBody"), 4);
+</script>
+</body>
+</html>

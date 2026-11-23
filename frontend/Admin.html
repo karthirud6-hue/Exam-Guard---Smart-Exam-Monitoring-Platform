@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Exam Guard</title>
+    <script src="auth.js"></script>
+    <script>requireRole("admin");</script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme.css">
+    <script src="theme.js"></script>
+</head>
+
+<body>
+
+<div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <div class="brand">
+            <span class="brand-mark"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <div>
+                <span class="brand-name">Exam Guard</span>
+                <small>Admin Portal</small>
+            </div>
+        </div>
+
+        <p class="menu-title">Main Menu</p>
+
+        <nav class="side-nav">
+            <a href="#overview" class="nav-link active">
+                <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+                Dashboard
+            </a>
+            <a href="manage-users.html?role=student" class="nav-link">
+                <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                Manage Students
+            </a>
+            <a href="manage-users.html?role=examiner" class="nav-link">
+                <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+                Manage Examiners
+            </a>
+            <a href="assign-exam.html" class="nav-link">
+                <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg>
+                Assign Examinations
+            </a>
+            <a href="view-results.html" class="nav-link">
+                <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="M8 17v-5"/><path d="M13 17V8"/><path d="M18 17v-9"/></svg>
+                View Reports
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <button class="logout" onclick="logout()">
+                <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+                Log out
+            </button>
+        </div>
+
+    </aside>
+
+    <!-- Main content -->
+    <main class="main">
+
+        <div class="topbar">
+            <h2>Admin Dashboard</h2>
+            <div class="profile">
+                <span class="avatar"><svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
+                Administrator
+            </div>
+        </div>
+
+        <section class="welcome" id="overview">
+            <h1>Welcome back, Admin</h1>
+            <p>Manage users, examinations and overall system activity.</p>
+        </section>
+
+        <section>
+
+            <h2 class="section-title">Overview</h2>
+
+            <div class="dashboard-cards">
+
+                <div class="card stat">
+                    <div class="icon-chip"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
+                    <div>
+                        <h3>Total Students</h3>
+                        <h2 id="totalStudents">00</h2>
+                    </div>
+                </div>
+
+                <div class="card stat">
+                    <div class="icon-chip violet"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
+                    <div>
+                        <h3>Total Examiners</h3>
+                        <h2 id="totalExaminers">00</h2>
+                    </div>
+                </div>
+
+                <div class="card stat">
+                    <div class="icon-chip green"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg></div>
+                    <div>
+                        <h3>Total Examinations</h3>
+                        <h2 id="totalExaminations">00</h2>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section>
+
+            <h2 class="section-title">Management</h2>
+
+            <div class="management-cards">
+
+                <div class="card management-card">
+                    <div class="icon-chip"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
+                    <h3>Manage Students</h3>
+                    <p>View and manage student accounts and details.</p>
+                    <button onclick="window.location.href='manage-users.html?role=student'">
+                        Manage students →
+                    </button>
+                </div>
+
+                <div class="card management-card">
+                    <div class="icon-chip violet"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
+                    <h3>Manage Examiners</h3>
+                    <p>View and manage examiner accounts and details.</p>
+                    <button onclick="window.location.href='manage-users.html?role=examiner'">
+                        Manage examiners →
+                    </button>
+                </div>
+
+                <div class="card management-card">
+                    <div class="icon-chip amber"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg></div>
+                    <h3>Assign Examinations</h3>
+                    <p>Assign examinations to students and manage schedules.</p>
+                    <button onclick="window.location.href='assign-exam.html'">
+                        Assign exams →
+                    </button>
+                </div>
+
+                <div class="card management-card">
+                    <div class="icon-chip green"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="M8 17v-5"/><path d="M13 17V8"/><path d="M18 17v-9"/></svg></div>
+                    <h3>View Reports</h3>
+                    <p>View overall examination performance and system reports.</p>
+                    <button onclick="window.location.href='view-results.html'">
+                        View reports →
+                    </button>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section>
+
+            <h2 class="section-title">Results at a glance</h2>
+
+            <div class="perf-grid">
+
+                <div class="card perf-ring-card">
+                    <h3>Average score</h3>
+                    <div class="ring-wrap" id="avgRing"></div>
+                    <div class="perf-meta">
+                        <div><small>Attempts</small><strong id="perfAttempts">00</strong></div>
+                        <div><small>Pass rate</small><strong id="perfPass">—</strong></div>
+                        <div><small>Warnings</small><strong id="perfWarnings">00</strong></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Recent attempts</h3>
+                    <p class="card-sub">Score percentage of the latest attempts — hover a bar for details.</p>
+                    <div class="bar-chart" id="recentBars"></div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <footer class="site-footer">
+            Exam Guard © 2026
+        </footer>
+
+    </main>
+
+</div>
+
+<script>
+
+    // Count Students
+    const students = JSON.parse(
+        localStorage.getItem("studentUsers") || "[]"
+    );
+
+    document.getElementById("totalStudents").innerText =
+        String(students.length).padStart(2, "0");
+
+    // Count Examiners
+    const examiners = JSON.parse(
+        localStorage.getItem("examinerUsers") || "[]"
+    );
+
+    document.getElementById("totalExaminers").innerText =
+        String(examiners.length).padStart(2, "0");
+
+    // Count Examinations
+    const examinations = JSON.parse(
+        localStorage.getItem("examinations") || "[]"
+    );
+
+    document.getElementById("totalExaminations").innerText =
+        String(examinations.length).padStart(2, "0");
+
+</script>
+
+<script src="charts.js"></script>
+<script>
+    ExamCharts.mountPerformance("examResults");
+</script>
+</body>
+</html>

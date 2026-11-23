@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assign Examinations | Exam Guard</title>
+    <script src="auth.js"></script>
+    <script>requireRole("admin");</script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme.css">
+    <script src="theme.js"></script>
+
+    <style>
+        .card label:first-child { margin-top: 0; }
+
+        /* Built by the page script */
+        .exam-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 24px;
+            margin: 14px 0 6px;
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        .exam-details:empty { display: none; }
+
+        .exam-details strong { color: var(--text-2); }
+
+        .student-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .student-list .empty-message { grid-column: 1 / -1; }
+
+        .student-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
+        }
+
+        .student-item:hover { border-color: var(--primary-border); }
+
+        .student-item:has(input:checked) {
+            border-color: var(--primary);
+            background: var(--primary-soft);
+        }
+
+        .student-item small {
+            display: block;
+            font-weight: 400;
+            color: var(--muted);
+        }
+
+        .message {
+            color: var(--success);
+            font-weight: 600;
+            font-size: 14px;
+            margin-top: 10px;
+            min-height: 20px;
+        }
+
+        #assignmentSummary {
+            margin-top: 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow-x: auto;
+        }
+
+        #assignmentSummary:has(.empty-message) { border: none; }
+    </style>
+</head>
+
+<body>
+
+<header class="appbar">
+    <div class="appbar-inner">
+        <div class="brand">
+            <span class="brand-mark"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <span class="brand-name">Exam Guard</span>
+        </div>
+        <span class="appbar-tag"><span class="live-dot"></span><span>Admin console</span></span>
+    </div>
+</header>
+
+<main class="page">
+
+    <div class="page-head">
+        <div>
+            <a class="back-link" href="Admin.html">← Back to admin dashboard</a>
+            <h1>Assign Examinations</h1>
+            <p>Assign examinations created by examiners to students.</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <label for="examSelect">Examination</label>
+        <select id="examSelect"></select>
+
+        <div id="examDetails" class="exam-details"></div>
+
+        <label>Students</label>
+        <div id="studentList" class="student-list"></div>
+
+        <button type="button" id="saveButton">Save Assignment</button>
+        <p id="message" class="message"></p>
+    </div>
+
+    <div class="card">
+        <h2>Current assignments</h2>
+        <div id="assignmentSummary"></div>
+    </div>
+
+</main>
+
+<footer class="site-footer">
+    Exam Guard © 2026
+</footer>
+
+<script>
+    const examSelect = document.getElementById("examSelect");
+    const examDetails = document.getElementById("examDetails");
+    const studentList = document.getElementById("studentList");
+    const saveButton = document.getElementById("saveButton");
+    const message = document.getElementById("message");
+    const assignmentSummary = document.getElementById("assignmentSummary");
+
+    function getExams() {
+        return JSON.parse(localStorage.getItem("examinations") || "[]");
+    }
+
+    function getStudents() {
+        return JSON.parse(localStorage.getItem("studentUsers") || "[]");
+    }
+
+    function examLabel(exam) {
+        return (exam.examName || "Untitled") +
+            (exam.subject ? " (" + exam.subject + ")" : "");
+    }
+
+    function textElement(tag, text) {
+        const element = document.createElement(tag);
+        element.textContent = text;
+        return element;
+    }
+
+    function displayExamOptions() {
+        const exams = getExams();
+        examSelect.innerHTML = "";
+
+        if (exams.length === 0) {
+            examSelect.appendChild(
+                textElement("option", "No examinations created yet")
+            );
+            examSelect.disabled = true;
+            saveButton.disabled = true;
+            return;
+        }
+
+        exams.forEach((exam, index) => {
+            const option = textElement("option", examLabel(exam));
+            option.value = index;
+            examSelect.appendChild(option);
+        });
+    }
+
+    function displayExamDetails() {
+        const exam = getExams()[Number(examSelect.value)];
+        examDetails.innerHTML = "";
+
+        if (!exam) {
+            return;
+        }
+
+        [
+            ["Date", exam.examDate],
+            ["Start Time", exam.startTime],
+            ["Duration", exam.duration ? exam.duration + " minutes" : ""],
+            ["Questions added", (exam.questions || []).length]
+        ].forEach(([name, value]) => {
+            const line = document.createElement("div");
+            line.appendChild(textElement("strong", name + ": "));
+            line.appendChild(document.createTextNode(value || "-"));
+            examDetails.appendChild(line);
+        });
+    }
+
+    function displayStudents() {
+        const students = getStudents();
+        const exam = getExams()[Number(examSelect.value)];
+        const assigned = (exam && exam.assignedStudents) || [];
+
+        studentList.innerHTML = "";
+
+        if (students.length === 0) {
+            studentList.appendChild(textElement(
+                "p",
+                "No students added yet. Add students from Manage Students."
+            )).className = "empty-message";
+            saveButton.disabled = true;
+            return;
+        }
+
+        saveButton.disabled = !exam;
+
+        students.forEach(student => {
+            const item = document.createElement("label");
+            item.className = "student-item";
+
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.value = student.email;
+            checkbox.checked = assigned.includes(student.email);
+
+            const info = document.createElement("span");
+            info.appendChild(document.createTextNode(student.name));
+            info.appendChild(textElement("small", student.email));
+
+            item.appendChild(checkbox);
+            item.appendChild(info);
+            studentList.appendChild(item);
+        });
+    }
+
+    function displaySummary() {
+        const exams = getExams();
+        const students = getStudents();
+        assignmentSummary.innerHTML = "";
+
+        if (exams.length === 0) {
+            assignmentSummary.appendChild(
+                textElement("p", "No examinations available.")
+            ).className = "empty-message";
+            return;
+        }
+
+        const table = document.createElement("table");
+        const headerRow = document.createElement("tr");
+        headerRow.appendChild(textElement("th", "Examination"));
+        headerRow.appendChild(textElement("th", "Assigned Students"));
+        table.appendChild(headerRow);
+
+        exams.forEach(exam => {
+            const names = (exam.assignedStudents || []).map(email => {
+                const student = students.find(s => s.email === email);
+                return student ? student.name : email;
+            });
+
+            const row = document.createElement("tr");
+            row.appendChild(textElement("td", examLabel(exam)));
+            row.appendChild(textElement(
+                "td",
+                names.length ? names.join(", ") : "Not assigned"
+            ));
+            table.appendChild(row);
+        });
+
+        assignmentSummary.appendChild(table);
+    }
+
+    function refresh() {
+        message.textContent = "";
+        displayExamDetails();
+        displayStudents();
+    }
+
+    examSelect.addEventListener("change", refresh);
+
+    saveButton.addEventListener("click", function () {
+        const exams = getExams();
+        const exam = exams[Number(examSelect.value)];
+
+        if (!exam) {
+            alert("Examination not found. Please refresh the page.");
+            return;
+        }
+
+        exam.assignedStudents = Array.from(
+            studentList.querySelectorAll("input[type=checkbox]:checked")
+        ).map(checkbox => checkbox.value);
+
+        localStorage.setItem("examinations", JSON.stringify(exams));
+
+        message.textContent = "Assignment saved for " +
+            exam.assignedStudents.length + " student(s).";
+
+        displaySummary();
+    });
+
+    displayExamOptions();
+    refresh();
+    displaySummary();
+</script>
+
+</body>
+</html>
+

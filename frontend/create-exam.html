@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Examination | Exam Guard</title>
+    <script src="auth.js"></script>
+    <script>requireRole("examiner");</script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme.css">
+    <script src="theme.js"></script>
+
+    <style>
+        .form-section + .form-section {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .form-section h3 {
+            font-size: 14px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 28px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="appbar">
+    <div class="appbar-inner">
+        <div class="brand">
+            <span class="brand-mark"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <span class="brand-name">Exam Guard</span>
+        </div>
+        <span class="appbar-tag"><span class="live-dot"></span><span>Examiner workspace</span></span>
+    </div>
+</header>
+
+<main class="page narrow">
+
+    <div class="page-head">
+        <div>
+            <a class="back-link" href="Examiner.html">← Back to dashboard</a>
+            <h1>Create New Examination</h1>
+            <p>Set up the details, schedule and marking for a new exam.</p>
+        </div>
+    </div>
+
+    <div class="card">
+
+        <form id="examForm">
+
+            <div class="form-section">
+                <h3>Details</h3>
+                <div class="form-grid">
+                    <div class="span-2">
+                        <label for="examName">Examination name</label>
+                        <input type="text" id="examName" placeholder="e.g. Mid-term Assessment" required>
+                    </div>
+                    <div class="span-2">
+                        <label for="subject">Subject</label>
+                        <input type="text" id="subject" placeholder="e.g. Computer Science" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Schedule</h3>
+                <div class="form-grid">
+                    <div>
+                        <label for="examDate">Examination date</label>
+                        <input type="date" id="examDate" required>
+                    </div>
+                    <div>
+                        <label for="startTime">Start time</label>
+                        <input type="time" id="startTime" required>
+                    </div>
+                    <div>
+                        <label for="duration">Duration (minutes)</label>
+                        <input type="number" id="duration" min="1" placeholder="60" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Marking</h3>
+                <div class="form-grid">
+                    <div>
+                        <label for="totalMarks">Total marks</label>
+                        <input type="number" id="totalMarks" min="1" placeholder="100" required>
+                    </div>
+                    <div>
+                        <label for="totalQuestions">Number of questions</label>
+                        <input type="number" id="totalQuestions" min="1" placeholder="30" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a class="btn btn-secondary" href="Examiner.html">Cancel</a>
+                <button type="submit">Create Examination</button>
+            </div>
+
+        </form>
+
+    </div>
+
+</main>
+
+<footer class="site-footer">
+    Exam Guard © 2026
+</footer>
+
+<script>
+    document.getElementById("examForm").addEventListener("submit", function(event) {
+
+        event.preventDefault();
+
+        const exam = {
+            examName: document.getElementById("examName").value,
+            subject: document.getElementById("subject").value,
+            examDate: document.getElementById("examDate").value,
+            startTime: document.getElementById("startTime").value,
+            duration: document.getElementById("duration").value,
+            totalMarks: document.getElementById("totalMarks").value,
+            totalQuestions: document.getElementById("totalQuestions").value
+        };
+
+        let examinations = JSON.parse(
+            localStorage.getItem("examinations") || "[]"
+        );
+
+        examinations.push(exam);
+
+        localStorage.setItem(
+            "examinations",
+            JSON.stringify(examinations)
+        );
+
+        alert("Examination created successfully!");
+
+        window.location.href = ROLE_HOME[getRole()];
+
+    });
+    </script>
+
+</body>
+</html>

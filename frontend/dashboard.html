@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard | Exam Guard</title>
+    <script src="auth.js"></script>
+    <script>requireRole("student");</script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme.css">
+    <script src="theme.js"></script>
+
+    <style>
+        /* Exam cards are built by the script below (.exam, .exam-top, .status, .exam-details, .start-btn) */
+        #examList {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 18px;
+        }
+
+        .exam {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            color: var(--muted);
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .exam:hover {
+            border-color: var(--primary-border);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .exam-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .exam-top h3 { font-size: 17px; }
+
+        .exam-details {
+            display: grid;
+            gap: 6px;
+            padding: 14px 0;
+            margin-bottom: 18px;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        .exam-details strong { color: var(--text-2); font-weight: 600; }
+
+        .start-btn { margin-top: auto; width: 100%; }
+
+        @media (max-width: 400px) {
+            #examList { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="layout">
+
+    <aside class="sidebar">
+
+        <div class="brand">
+            <span class="brand-mark"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <div>
+                <span class="brand-name">Exam Guard</span>
+                <small>Student Portal</small>
+            </div>
+        </div>
+
+        <p class="menu-title">Main Menu</p>
+
+        <nav class="side-nav">
+            <a href="#overview" class="nav-link active">
+                <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+                Dashboard
+            </a>
+            <a href="#upcoming" class="nav-link">
+                <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M9 15h6M9 11h2"/></svg>
+                Available Exams
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <button class="logout" onclick="logout()">
+                <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+                Log out
+            </button>
+        </div>
+
+    </aside>
+
+    <main class="main">
+
+        <div class="topbar">
+            <h2>Student Dashboard</h2>
+            <div class="profile">
+                <span class="avatar"><svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
+                Student
+            </div>
+        </div>
+
+        <section class="welcome" id="overview">
+            <h1>Welcome back</h1>
+            <p>Here's an overview of your examination activity.</p>
+        </section>
+
+        <section class="cards">
+
+            <div class="card stat">
+                <div class="icon-chip"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg></div>
+                <div>
+                    <h3>Available Exams</h3>
+                    <h2 id="totalExams">00</h2>
+                </div>
+            </div>
+
+            <div class="card stat">
+                <div class="icon-chip green"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg></div>
+                <div>
+                    <h3>Attempts Completed</h3>
+                    <h2 id="completedAttempts">00</h2>
+                </div>
+            </div>
+
+            <div class="card stat">
+                <div class="icon-chip violet"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="M8 17v-5"/><path d="M13 17V8"/><path d="M18 17v-9"/></svg></div>
+                <div>
+                    <h3>Average Score</h3>
+                    <h2 id="averageScore">--</h2>
+                </div>
+            </div>
+
+        </section>
+
+        <section id="upcoming">
+
+            <h2 class="section-title">Available Examinations</h2>
+
+            <div id="examList"></div>
+
+        </section>
+
+        <section>
+
+            <h2 class="section-title">Your performance</h2>
+
+            <div class="perf-grid">
+
+                <div class="card perf-ring-card">
+                    <h3>Average score</h3>
+                    <div class="ring-wrap" id="avgRing"></div>
+                    <div class="perf-meta">
+                        <div><small>Attempts</small><strong id="perfAttempts">00</strong></div>
+                        <div><small>Pass rate</small><strong id="perfPass">—</strong></div>
+                        <div><small>Warnings</small><strong id="perfWarnings">00</strong></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Recent attempts</h3>
+                    <p class="card-sub">Your latest attempts — hover a bar for details.</p>
+                    <div class="bar-chart" id="recentBars"></div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <footer class="site-footer">
+            Exam Guard © 2026
+        </footer>
+
+    </main>
+
+</div>
+
+<script>
+
+    // Show every examination that has questions
+    const allExams = JSON.parse(
+        localStorage.getItem("examinations") || "[]"
+    );
+
+    const examList = document.getElementById("examList");
+    let availableCount = 0;
+
+    allExams.forEach((exam, index) => {
+
+        const questionCount = (exam.questions || []).length;
+
+        if (questionCount === 0) {
+            return;
+        }
+
+        availableCount++;
+
+        const card = document.createElement("div");
+        card.className = "exam";
+
+        const top = document.createElement("div");
+        top.className = "exam-top";
+
+        const title = document.createElement("h3");
+        title.textContent = exam.examName || "Examination";
+
+        const status = document.createElement("span");
+        status.className = "status";
+        status.textContent = "● Available";
+
+        top.appendChild(title);
+        top.appendChild(status);
+
+        const details = document.createElement("div");
+        details.className = "exam-details";
+
+        [
+            ["📚", "Subject", exam.subject || "-"],
+            ["⏱", "Duration", (exam.duration || "-") + " Minutes"],
+            ["📋", "Questions", questionCount]
+        ].forEach(([icon, label, value]) => {
+            const line = document.createElement("p");
+            const strong = document.createElement("strong");
+            strong.textContent = label + ":";
+            line.append(icon + " ", strong, " " + value);
+            details.appendChild(line);
+        });
+
+        const button = document.createElement("button");
+        button.className = "start-btn";
+        button.textContent = "Start Examination →";
+        button.onclick = function () {
+            startExam(index);
+        };
+
+        card.appendChild(top);
+        card.appendChild(details);
+        card.appendChild(button);
+        examList.appendChild(card);
+    });
+
+    if (availableCount === 0) {
+        const empty = document.createElement("div");
+        empty.className = "exam";
+        empty.textContent = "No examinations are available yet.";
+        examList.appendChild(empty);
+    }
+
+    document.getElementById("totalExams").innerText =
+        String(availableCount).padStart(2, "0");
+
+    // Remember which exam the student chose
+    function startExam(index) {
+        sessionStorage.setItem("selectedExamIndex", index);
+        window.location.href = "instructions.html";
+    }
+
+    const completedAttempts =
+        localStorage.getItem("completedAttempts") || 0;
+
+    document.getElementById("completedAttempts").innerText =
+        String(completedAttempts).padStart(2, "0");
+
+    const examScores = JSON.parse(
+    localStorage.getItem("examScores") || "[]"
+);
+
+const validScores = examScores
+    .map(item => {
+        const score = typeof item === "number"
+            ? item
+            : Number(item?.percentage ?? item?.score);
+
+        return score;
+    })
+    .filter(score => Number.isFinite(score));
+
+if (validScores.length > 0) {
+
+    const totalScore = validScores.reduce(
+        (sum, score) => sum + score, 0
+    );
+
+    const average = totalScore / validScores.length;
+
+    document.getElementById("averageScore").innerText =
+        average.toFixed(2) + "%";
+
+} else {
+
+    document.getElementById("averageScore").innerText = "0%";
+
+}
+
+</script>
+
+<script src="charts.js"></script>
+<script>
+    ExamCharts.mountPerformance("examScores");
+</script>
+</body>
+</html>

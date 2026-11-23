@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Instructions | Exam Guard</title>
+    <script src="auth.js"></script>
+    <script>requireRole("student");</script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme.css">
+    <script src="theme.js"></script>
+
+    <style>
+        .exam-info {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .info-tile {
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+        }
+
+        .info-tile small {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--muted);
+            margin-bottom: 4px;
+        }
+
+        .info-tile span {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .rules {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .rules .card + .card { margin-top: 0; }
+
+        .rules h2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .rules li { font-size: 14px; }
+
+        .notice { margin: 20px 0; }
+
+        .agreement {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+        }
+
+        .agreement:has(input:checked) {
+            border-color: var(--primary);
+            background: var(--primary-soft);
+        }
+
+        .agreement input { margin-top: 2px; }
+
+        .agreement label {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-2);
+            cursor: pointer;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 760px) {
+            .exam-info { grid-template-columns: 1fr 1fr; }
+            .rules { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="appbar">
+    <div class="appbar-inner">
+        <div class="brand">
+            <span class="brand-mark"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <span class="brand-name">Exam Guard</span>
+        </div>
+        <span class="appbar-tag"><span class="live-dot"></span><span>Online examination</span></span>
+    </div>
+</header>
+
+<main class="page">
+
+    <div class="stepper" aria-label="Exam progress">
+        <span class="step active"><span class="step-num">1</span>Instructions</span>
+        <span class="step-line"></span>
+        <span class="step"><span class="step-num">2</span>Webcam check</span>
+        <span class="step-line"></span>
+        <span class="step"><span class="step-num">3</span>Examination</span>
+    </div>
+
+    <div class="page-head">
+        <div>
+            <h1>Examination Instructions</h1>
+            <p>Please read all instructions carefully before starting your examination.</p>
+        </div>
+    </div>
+
+    <div class="exam-info">
+        <div class="info-tile"><small>Exam name</small><span id="infoName">-</span></div>
+        <div class="info-tile"><small>Subject</small><span id="infoSubject">-</span></div>
+        <div class="info-tile"><small>Duration</small><span><span id="infoDuration">-</span> minutes</span></div>
+        <div class="info-tile"><small>Total questions</small><span id="infoQuestions">-</span></div>
+    </div>
+
+    <div class="rules">
+
+        <div class="card">
+            <h2><span class="icon-chip"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M9 15h6M9 11h2"/></svg></span>General instructions</h2>
+            <ul>
+                <li>Read every question carefully before answering.</li>
+                <li>Do not refresh or close the examination browser window.</li>
+                <li>Ensure that your internet connection is stable.</li>
+                <li>Complete the examination within the given time.</li>
+                <li>Do not switch tabs or windows during the examination.</li>
+                <li>Submit your answers before the examination timer ends.</li>
+                <li>Do not use mobile phones or other unauthorized devices.</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2><span class="icon-chip violet"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m22 8-6 4 6 4z"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg></span>Webcam monitoring</h2>
+            <ul>
+                <li>Keep your face clearly visible to the webcam.</li>
+                <li>Sit in a well-lit and quiet environment.</li>
+                <li>Allow webcam permission when requested by the browser.</li>
+                <li>Follow all examination monitoring rules.</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <div class="notice">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 21h20z"/><path d="M12 10v4M12 17.5v.01"/></svg>
+        <div>
+            <strong>Important notice:</strong>
+            Your examination may use webcam monitoring and activity
+            tracking. Monitoring will only begin after the required
+            permissions and exam-start process are completed.
+        </div>
+    </div>
+
+    <div class="agreement">
+        <input type="checkbox" id="agree">
+
+        <label for="agree">
+            I have read and understood all examination instructions.
+            I agree to follow the examination rules.
+        </label>
+    </div>
+
+    <div class="actions">
+        <button class="back" onclick="goBack()">← Back</button>
+
+        <button id="startBtn" onclick="startExam()" disabled>
+            Continue to webcam check →
+        </button>
+    </div>
+
+</main>
+
+<footer class="site-footer">
+    Exam Guard © 2026
+</footer>
+
+<script>
+
+    // Show the exam the student picked on the dashboard
+    const chosenExam = JSON.parse(
+        localStorage.getItem("examinations") || "[]"
+    )[Number(sessionStorage.getItem("selectedExamIndex"))];
+
+    if (!chosenExam || !(chosenExam.questions || []).length) {
+        alert("Please choose an examination from your dashboard.");
+        window.location.href = "dashboard.html";
+    } else {
+        document.getElementById("infoName").textContent = chosenExam.examName || "Examination";
+        document.getElementById("infoSubject").textContent = chosenExam.subject || "-";
+        document.getElementById("infoDuration").textContent = chosenExam.duration || "-";
+        document.getElementById("infoQuestions").textContent = chosenExam.questions.length;
+    }
+
+    const agree = document.getElementById("agree");
+    const startBtn = document.getElementById("startBtn");
+
+    agree.addEventListener("change", function() {
+        startBtn.disabled = !agree.checked;
+    });
+
+    function goBack() {
+        window.location.href = "dashboard.html";
+    }
+
+    function startExam() {
+        if (agree.checked) {
+            window.location.href = "webcam.html";
+        }
+    }
+
+</script>
+
+</body>
+</html>

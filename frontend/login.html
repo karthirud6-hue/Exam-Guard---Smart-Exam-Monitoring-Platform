@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In | Exam Guard</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme.css">
+    <script src="theme.js"></script>
+
+    <script
+        id="google-identity"
+        src="https://accounts.google.com/gsi/client"
+        async
+        defer>
+    </script>
+</head>
+
+<body class="login-page">
+
+<div class="auth">
+
+    <aside class="auth-aside">
+
+        <div class="brand brand-wordmark">
+            <div>
+                <span class="brand-name">Exam Guard</span>
+                <small>Smart Exam Monitoring</small>
+            </div>
+        </div>
+
+        <div class="auth-pitch">
+            <span class="eyebrow"><span class="live-dot"></span> Secure examination portal</span>
+
+            <h1>Smart and secure online examinations.</h1>
+
+            <p>
+                Exam Guard monitors candidates with webcam-based face detection
+                to keep every online exam fair, focused and transparent.
+            </p>
+
+            <!-- Decorative preview of the live monitoring panel -->
+            <div class="monitor-preview" aria-hidden="true">
+                <div class="mp-head">
+                    <span class="live-dot"></span>
+                    Live monitoring
+                    <span class="mp-timer">44:56</span>
+                </div>
+
+                <div class="mp-cam">
+                    <svg class="mp-face" viewBox="0 0 200 130">
+                        <defs>
+                            <linearGradient id="mpSkin" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0" stop-color="#cbd5e1"/>
+                                <stop offset="1" stop-color="#64748b"/>
+                            </linearGradient>
+                        </defs>
+                        <path d="M30 130c4-34 34-52 70-52s66 18 70 52z" fill="url(#mpSkin)" opacity=".55"/>
+                        <ellipse cx="100" cy="50" rx="27" ry="32" fill="url(#mpSkin)" opacity=".8"/>
+                    </svg>
+                    <div class="mp-box">
+                        <span></span><span></span><span></span><span></span>
+                        <em>Face · 98%</em>
+                    </div>
+                    <div class="mp-scan"></div>
+                </div>
+
+                <div class="mp-chips">
+                    <span class="mp-chip ok">✓ 1 face detected</span>
+                    <span class="mp-chip">Looking at screen</span>
+                    <span class="mp-chip">Tab focus OK</span>
+                </div>
+
+                <div class="mp-float">
+                    <span class="icon-chip green"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span>
+                    <div><small>Integrity</small><strong>0 warnings</strong></div>
+                </div>
+            </div>
+
+            <div class="feature-chips">
+                <span><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Face monitoring</span>
+                <span><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Auto-submit timer</span>
+                <span><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="M8 17v-5"/><path d="M13 17V8"/><path d="M18 17v-9"/></svg>Instant results</span>
+            </div>
+        </div>
+
+        <div class="auth-aside-footer">© 2026 Exam Guard · Secure · Intelligent · Transparent</div>
+
+    </aside>
+
+    <main class="auth-main">
+
+        <section class="auth-card">
+
+            <h2>Sign in</h2>
+
+            <p class="card-sub">
+                Enter your details to access your portal.
+            </p>
+
+            <form id="loginForm">
+
+                <label for="email">Email or username</label>
+
+                <input
+                    type="text"
+                    id="email"
+                    placeholder="you@example.com"
+                    autocomplete="username"
+                    required
+                >
+
+                <label for="password">Password</label>
+
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                    required
+                >
+
+                <label for="role">Role</label>
+
+                <select id="role" required>
+                    <option value="" disabled selected>Select your role</option>
+                    <option value="student">Student</option>
+                    <option value="examiner">Examiner</option>
+                    <option value="admin">Admin</option>
+                </select>
+
+                <button type="submit" class="login-button">
+                    Sign In <span>→</span>
+                </button>
+
+            </form>
+
+            <p id="loginMessage" class="form-message" role="status"></p>
+
+            <div class="divider">OR</div>
+
+            <div id="googleButtonContainer"
+                 style="display: flex; justify-content: center;">
+            </div>
+
+            <p id="googleMessage" class="form-message" role="status"></p>
+
+            <p class="auth-switch">
+                Don't have an account?
+                <a href="index.html">Register here</a>
+            </p>
+
+            <div class="secure-note">
+                <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+                Secure access to your examination account
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<script src="auth.js?v=2"></script>
+    <script src="script.js?v=2"></script>
+
+</body>
+</html>
+

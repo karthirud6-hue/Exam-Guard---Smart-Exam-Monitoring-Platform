@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users | Exam Guard</title>
+    <script src="auth.js"></script>
+    <script>requireRole("admin");</script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme.css">
+    <script src="theme.js"></script>
+
+    <style>
+        #userForm {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 12px;
+            align-items: end;
+            margin-top: 14px;
+        }
+
+        #userForm label { margin-top: 0; }
+
+        #userForm button { height: 44px; }
+
+        table { min-width: 480px; }
+
+        td:last-child,
+        th:last-child { text-align: right; width: 1%; white-space: nowrap; }
+
+        .delete {
+            background: var(--surface);
+            color: var(--danger);
+            border-color: #fecaca;
+        }
+
+        .delete:hover { background: var(--danger-soft); }
+
+        .table-card h2 { margin-bottom: 14px; }
+
+        @media (max-width: 680px) {
+            #userForm { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="appbar">
+    <div class="appbar-inner">
+        <div class="brand">
+            <span class="brand-mark"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <span class="brand-name">Exam Guard</span>
+        </div>
+        <span class="appbar-tag"><span class="live-dot"></span><span>Admin console</span></span>
+    </div>
+</header>
+
+<main class="page">
+
+    <div class="page-head">
+        <div>
+            <a class="back-link" href="Admin.html">← Back to admin dashboard</a>
+            <h1 id="pageTitle">Manage Users</h1>
+            <p>Add, view and delete user records.</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Add user</h2>
+
+        <form id="userForm">
+            <div>
+                <label for="userName">Full name</label>
+                <input type="text" id="userName"
+                    placeholder="Enter full name" required>
+            </div>
+
+            <div>
+                <label for="userEmail">Email address</label>
+                <input type="email" id="userEmail"
+                    placeholder="Enter email address" required>
+            </div>
+
+            <button type="submit">Add User</button>
+        </form>
+    </div>
+
+    <div class="card table-card">
+        <h2>User list</h2>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody id="userList"></tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<footer class="site-footer">
+    Exam Guard © 2026
+</footer>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const role = params.get("role") === "examiner"
+        ? "examiner"
+        : "student";
+
+    const storageKey = role + "Users";
+
+    document.getElementById("pageTitle").innerText =
+        role === "student" ? "Manage Students" : "Manage Examiners";
+
+    let users = JSON.parse(
+        localStorage.getItem(storageKey) || "[]"
+    );
+
+    function displayUsers() {
+        const userList = document.getElementById("userList");
+
+        userList.innerHTML = "";
+
+        users.forEach((user, index) => {
+            const row = document.createElement("tr");
+
+            const nameCell = document.createElement("td");
+            nameCell.textContent = user.name;
+
+            const emailCell = document.createElement("td");
+            emailCell.textContent = user.email;
+
+            const actionCell = document.createElement("td");
+            const deleteButton = document.createElement("button");
+
+            deleteButton.textContent = "Delete";
+            deleteButton.className = "delete";
+
+            deleteButton.onclick = function () {
+                if (confirm("Delete this user record?")) {
+                    users.splice(index, 1);
+
+                    localStorage.setItem(
+                        storageKey,
+                        JSON.stringify(users)
+                    );
+
+                    displayUsers();
+                }
+            };
+
+            actionCell.appendChild(deleteButton);
+
+            row.appendChild(nameCell);
+            row.appendChild(emailCell);
+            row.appendChild(actionCell);
+
+            userList.appendChild(row);
+        });
+
+        if (users.length === 0) {
+            const row = document.createElement("tr");
+            const cell = document.createElement("td");
+
+            cell.colSpan = 3;
+            cell.textContent = "No users added yet.";
+
+            row.appendChild(cell);
+            userList.appendChild(row);
+        }
+    }
+
+    document.getElementById("userForm").addEventListener(
+        "submit",
+        function(event) {
+            event.preventDefault();
+
+            const name = document.getElementById("userName").value.trim();
+            const email = document.getElementById("userEmail").value.trim();
+
+            users.push({ name: name, email: email });
+
+            localStorage.setItem(
+                storageKey,
+                JSON.stringify(users)
+            );
+
+            this.reset();
+            displayUsers();
+
+            alert("User added successfully!");
+        }
+    );
+
+    displayUsers();
+</script>
+
+</body>
+</html>

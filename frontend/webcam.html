@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webcam Check | Exam Guard</title>
+    <script src="auth.js"></script>
+    <script>requireRole("student");</script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme.css">
+    <script src="theme.js"></script>
+
+    <style>
+        .cam-card {
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        .video-frame {
+            position: relative;
+            aspect-ratio: 4 / 3;
+            margin: 18px 0;
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: var(--navy-950);
+            display: grid;
+            place-items: center;
+        }
+
+        .video-placeholder {
+            position: absolute;
+            display: grid;
+            justify-items: center;
+            gap: 10px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        video {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transform: scaleX(-1);
+        }
+
+        .status-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .status-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface-2);
+        }
+
+        .status-row small {
+            display: block;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        #status,
+        #faceStatus {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .cam-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 22px;
+            padding-top: 18px;
+            border-top: 1px solid var(--border);
+        }
+
+        @media (max-width: 560px) {
+            .status-list { grid-template-columns: 1fr; }
+            .cam-actions button { flex: 1; }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="appbar">
+    <div class="appbar-inner">
+        <div class="brand">
+            <span class="brand-mark"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <span class="brand-name">Exam Guard</span>
+        </div>
+        <span class="appbar-tag"><span class="live-dot"></span><span>Online examination</span></span>
+    </div>
+</header>
+
+<main class="page">
+
+    <div class="stepper" aria-label="Exam progress" style="justify-content: center;">
+        <span class="step done"><span class="step-num">✓</span>Instructions</span>
+        <span class="step-line"></span>
+        <span class="step active"><span class="step-num">2</span>Webcam check</span>
+        <span class="step-line"></span>
+        <span class="step"><span class="step-num">3</span>Examination</span>
+    </div>
+
+    <div class="card cam-card">
+
+        <h2>Webcam Monitoring</h2>
+
+        <p class="card-sub">Allow camera access and make sure exactly one face is detected before starting your examination.</p>
+
+        <div class="video-frame">
+            <div class="video-placeholder">
+                <svg class="i i-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="m22 8-6 4 6 4z"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>
+                Camera preview will appear here
+            </div>
+            <video id="camera" autoplay playsinline muted></video>
+        </div>
+
+        <div class="status-list">
+            <div class="status-row">
+                <span class="icon-chip"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m22 8-6 4 6 4z"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg></span>
+                <div><small>Camera</small><p id="status">Camera is not started.</p></div>
+            </div>
+            <div class="status-row">
+                <span class="icon-chip violet"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span>
+                <div><small>Face detection</small><p id="faceStatus">Face detection is waiting...</p></div>
+            </div>
+        </div>
+
+        <div class="cam-actions">
+            <div class="button-row">
+                <button onclick="startCamera()">
+                    Start Webcam
+                </button>
+
+                <button class="btn-secondary" onclick="stopCamera()">
+                    Stop Webcam
+                </button>
+            </div>
+
+            <button id="continueBtn" onclick="continueExam()" disabled>
+                Continue to Examination →
+            </button>
+        </div>
+
+    </div>
+
+</main>
+
+<footer class="site-footer">
+    Exam Guard © 2026
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+<script>
+
+let stream = null;
+
+async function startCamera() {
+
+    try {
+
+        stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false
+        });
+
+        document.getElementById("camera").srcObject = stream;
+
+        await loadFaceModels();
+        detectFace();
+
+        document.getElementById("status").innerText =
+            "Webcam is active.";
+
+        document.getElementById("continueBtn").disabled = false;
+
+    } catch (error) {
+
+        document.getElementById("status").innerText =
+            "Camera access denied or unavailable. Please check permissions.";
+
+        console.error(error);
+    }
+}
+
+function stopCamera() {
+
+    if (stream) {
+
+        stream.getTracks().forEach(track => track.stop());
+
+        stream = null;
+
+        document.getElementById("camera").srcObject = null;
+
+        document.getElementById("status").innerText =
+            "Camera stopped.";
+
+        document.getElementById("faceStatus").innerText =
+            "Face detection is waiting...";
+
+        document.getElementById("continueBtn").disabled = true;
+    }
+}
+
+function continueExam() {
+
+    window.location.href = "exam.html";
+
+}
+
+</script>
+
+<script>
+
+async function loadFaceModels() {
+    try {
+        await faceapi.nets.tinyFaceDetector.loadFromUri('./models');
+        await faceapi.nets.faceLandmark68Net.loadFromUri('./models');
+
+        console.log("Face detection models loaded successfully!");
+
+    } catch (error) {
+        console.error("Error loading face detection models:", error);
+    }
+}
+
+async function detectFace() {
+    const video = document.getElementById("camera");
+    const faceStatus = document.getElementById("faceStatus");
+
+    if (!stream || !video.videoWidth) {
+        return;
+    }
+
+    const faces = await faceapi.detectAllFaces(
+        video,
+        new faceapi.TinyFaceDetectorOptions()
+    );
+
+    if (faces.length === 0) {
+        faceStatus.innerText = "No face detected!";
+        faceStatus.style.color = "red";
+    } else if (faces.length === 1) {
+        faceStatus.innerText = "One face detected.";
+        faceStatus.style.color = "green";
+    } else {
+        faceStatus.innerText = "Warning: Multiple faces detected!";
+        faceStatus.style.color = "red";
+    }
+
+    if (stream) {
+        requestAnimationFrame(detectFace);
+    }
+}
+
+</script>
+
+</body>
+</html>

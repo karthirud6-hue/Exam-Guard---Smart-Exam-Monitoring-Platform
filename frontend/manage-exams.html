@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Examinations | Exam Guard</title>
+    <script src="auth.js"></script>
+    <script>requireRole("examiner");</script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme.css">
+    <script src="theme.js"></script>
+
+    <style>
+        /* Cards below are built by the page script (.exam-card, .delete-btn) */
+        #examList {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 18px;
+        }
+
+        .exam-card {
+            display: flex;
+            flex-direction: column;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            padding: 22px;
+        }
+
+        .exam-card h3 {
+            font-size: 17px;
+            margin-bottom: 12px;
+        }
+
+        .exam-card p {
+            font-size: 14px;
+            line-height: 1.9;
+            color: var(--muted);
+            padding: 12px 0;
+            margin-bottom: 16px;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .exam-card p strong { color: var(--text-2); }
+
+        .exam-card .delete-btn {
+            margin-top: auto;
+            align-self: flex-start;
+            background: var(--surface);
+            color: var(--danger);
+            border-color: #fecaca;
+        }
+
+        .exam-card .delete-btn:hover {
+            background: var(--danger-soft);
+        }
+
+        #examList > .empty-message { grid-column: 1 / -1; }
+    </style>
+</head>
+
+<body>
+
+<header class="appbar">
+    <div class="appbar-inner">
+        <div class="brand">
+            <span class="brand-mark"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <span class="brand-name">Exam Guard</span>
+        </div>
+        <span class="appbar-tag"><span class="live-dot"></span><span>Examiner workspace</span></span>
+    </div>
+</header>
+
+<main class="page">
+
+    <div class="page-head">
+        <div>
+            <a class="back-link" href="Examiner.html">← Back to dashboard</a>
+            <h1>Manage Examinations</h1>
+            <p>View and manage examinations created by the examiner.</p>
+        </div>
+        <a class="btn" href="create-exam.html">+ New examination</a>
+    </div>
+
+    <div id="examList"></div>
+
+</main>
+
+<footer class="site-footer">
+    Exam Guard © 2026
+</footer>
+
+<script>
+
+    function displayExams() {
+
+        const exams = JSON.parse(
+            localStorage.getItem("examinations") || "[]"
+        );
+
+        const examList = document.getElementById("examList");
+
+        examList.innerHTML = "";
+
+        if (exams.length === 0) {
+
+            examList.innerHTML =
+                '<p class="empty-message">No examinations created yet.</p>';
+
+            return;
+
+        }
+
+        exams.forEach((exam, index) => {
+
+            const card = document.createElement("div");
+
+            card.className = "exam-card";
+
+            card.innerHTML = `
+                <h3>${escapeHTML(exam.examName || exam.name || "")}</h3>
+
+                <p>
+                    <strong>Subject:</strong> ${escapeHTML(exam.subject || "")}<br>
+                    <strong>Date:</strong> ${escapeHTML(exam.examDate || "")}<br>
+                    <strong>Start Time:</strong> ${escapeHTML(exam.startTime || "")}<br>
+                    <strong>Duration:</strong> ${escapeHTML(exam.duration || "")} minutes<br>
+                    <strong>Total Marks:</strong> ${escapeHTML(exam.totalMarks || "")}<br>
+                    <strong>Questions:</strong> ${escapeHTML(exam.totalQuestions || "")}
+                </p>
+
+                <button class="delete-btn"
+                    onclick="deleteExam(${index})">
+                    Delete Examination
+                </button>
+            `;
+
+            examList.appendChild(card);
+
+        });
+
+    }
+
+    function escapeHTML(value) {
+
+        return String(value).replace(/[&<>"']/g, function(character) {
+
+            return {
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;"
+            }[character];
+
+        });
+
+    }
+
+    function deleteExam(index) {
+
+        if (!confirm("Are you sure you want to delete this examination?")) {
+            return;
+        }
+
+        const exams = JSON.parse(
+            localStorage.getItem("examinations") || "[]"
+        );
+
+        exams.splice(index, 1);
+
+        localStorage.setItem(
+            "examinations",
+            JSON.stringify(exams)
+        );
+
+        displayExams();
+
+    }
+
+    displayExams();
+
+</script>
+
+</body>
+</html>

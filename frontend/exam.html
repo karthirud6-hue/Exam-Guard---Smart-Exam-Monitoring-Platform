@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examination | Exam Guard</title>
+    <script src="auth.js"></script>
+    <script>requireRole("student");</script>
+
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme.css">
+    <script src="theme.js"></script>
+
+    <style>
+        /* ---- Top bar with timer ---- */
+        .exam-bar .appbar-inner { max-width: 1240px; }
+
+        .timer-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--muted);
+        }
+
+        #timer {
+            min-width: 92px;
+            padding: 8px 14px;
+            border-radius: 10px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            font-size: 20px;
+            font-weight: 700;
+            text-align: center;
+            color: var(--text);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ---- Layout ---- */
+        .container {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 24px;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 320px;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .container > .card + .card { margin-top: 0; }
+
+        #instructionsCard,
+        #result {
+            grid-column: 1 / -1;
+            max-width: 760px;
+            width: 100%;
+            justify-self: center;
+        }
+
+        #examCard  { grid-column: 1; grid-row: 1; }
+
+        #webcamBox {
+            grid-column: 2;
+            grid-row: 1;
+            position: sticky;
+            top: 88px;
+        }
+
+        #instructionsCard { display: block; }
+
+        #webcamBox,
+        #examCard,
+        #result { display: none; }
+
+        /* ---- Instructions ---- */
+        .exam-info {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin: 18px 0;
+        }
+
+        .exam-info p {
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface-2);
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .exam-info strong,
+        .exam-info span { display: block; }
+
+        .exam-info strong { font-weight: 500; color: var(--muted); }
+
+        .exam-info span {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+            margin-top: 2px;
+        }
+
+        .exam-info span span { display: inline; }
+
+        .rule-list {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 22px;
+        }
+
+        .rule-list p {
+            font-size: 14px;
+            padding-left: 4px;
+        }
+
+        /* ---- Webcam panel ---- */
+        #webcamBox h2 {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            margin-bottom: 14px;
+        }
+
+        #examCamera {
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            object-fit: cover;
+            border-radius: var(--radius);
+            background: var(--navy-950);
+            display: block;
+            transform: scaleX(-1);
+        }
+
+        .monitor-lines {
+            display: grid;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        #cameraStatus,
+        #faceStatus,
+        #warningDisplay {
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+        }
+
+        #warningDisplay {
+            color: var(--danger);
+            background: var(--danger-soft);
+            border-color: #fecaca;
+        }
+
+        #warningDisplay:empty { display: none; }
+
+        /* ---- Question card ---- */
+        .exam-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        #examDetails {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        #progress {
+            height: 8px;
+            margin: 16px 0 6px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        #progressBar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary-light), var(--primary));
+            border-radius: 999px;
+            transition: width 0.3s;
+        }
+
+        #question {
+            font-size: 19px;
+            font-weight: 600;
+            line-height: 1.45;
+            color: var(--text);
+            margin: 22px 0 16px;
+        }
+
+        #options {
+            display: grid;
+            gap: 10px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0;
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text);
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
+        }
+
+        .option:hover {
+            border-color: var(--primary-border);
+            background: var(--row-hover);
+        }
+
+        .option:has(input:checked) {
+            border-color: var(--primary);
+            background: var(--primary-soft);
+            box-shadow: 0 0 0 3px var(--primary-ring);
+        }
+
+        .question-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 22px;
+            padding-top: 18px;
+            border-top: 1px solid var(--border);
+        }
+
+        .navigation {
+            display: flex;
+            gap: 10px;
+        }
+
+        #reviewButton {
+            background: var(--surface);
+            color: var(--warning);
+            border-color: #fcd34d;
+        }
+
+        #reviewButton:hover { background: var(--warning-soft); }
+
+        /* ---- Palette ---- */
+        .palette {
+            margin-top: 24px;
+            padding: 18px;
+            border-radius: var(--radius);
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+        }
+
+        .palette-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .palette h3 { font-size: 14px; }
+
+        #answerCount {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--muted);
+        }
+
+        .palette-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin: 12px 0;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .answered-color     { background: var(--primary); }
+        .review-color       { background: #f59e0b; }
+        .not-answered-color { background: var(--surface); border: 1px solid var(--border-strong); }
+
+        #questionPalette {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+
+        .palette-btn {
+            height: 40px;
+            padding: 0;
+            font-size: 13px;
+            color: var(--text-2);
+            background: var(--surface);
+            border: 1px solid var(--border-strong);
+            box-shadow: none;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .palette-btn:hover { background: var(--primary-soft); color: var(--primary); }
+
+        .palette-btn.answered {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: var(--on-primary);
+        }
+
+        .palette-btn.review {
+            background: var(--warning-soft);
+            border-color: #f59e0b;
+            color: #92400e;
+        }
+
+        .palette-btn.current {
+            box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--text);
+        }
+
+        .submit-row {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .submit-btn {
+            background: var(--navy-900);
+        }
+
+        .submit-btn:hover { background: #000; }
+
+        [data-theme="dark"] .submit-btn { background: var(--text); color: var(--bg); }
+        [data-theme="dark"] .submit-btn:hover { background: #fff; }
+        [data-theme="dark"] .palette-btn.review { color: #fbbf24; background: rgba(251, 191, 36, 0.12); }
+
+        /* ---- Result ---- */
+        #result { text-align: center; padding: 36px 28px; }
+
+        .result-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            border-radius: 50%;
+        }
+
+        #result h2 { font-size: 24px; }
+
+        .result-details {
+            display: grid;
+            gap: 8px;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: var(--radius);
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+        }
+
+        #score {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        #percentage { font-size: 16px; color: var(--text-2); }
+
+        #message { font-weight: 600; color: var(--success); }
+
+        #warnings { font-size: 14px; color: var(--muted); }
+
+        .result-actions { margin-top: 22px; }
+
+        /* ---- Responsive ---- */
+        @media (max-width: 960px) {
+            .container { grid-template-columns: 1fr; }
+
+            #webcamBox {
+                grid-column: 1;
+                grid-row: auto;
+                position: static;
+            }
+
+            #examCard { grid-row: auto; }
+
+            .webcam-inner {
+                display: grid;
+                grid-template-columns: 160px 1fr;
+                gap: 14px;
+                align-items: center;
+            }
+
+            .monitor-lines { margin-top: 0; }
+        }
+
+        @media (max-width: 560px) {
+            .container { padding: 16px; }
+            .exam-info { grid-template-columns: 1fr; }
+            .webcam-inner { grid-template-columns: 1fr; }
+            .question-actions,
+            .navigation { width: 100%; }
+            .navigation button { flex: 1; }
+            #timer { font-size: 17px; min-width: 76px; }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="appbar exam-bar">
+    <div class="appbar-inner">
+        <div class="brand">
+            <span class="brand-mark"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <span class="brand-name">Exam Guard</span>
+        </div>
+        <div class="timer-wrap">
+            <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            <span>Time left</span>
+            <div id="timer" role="timer" aria-live="off">60:00</div>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+
+    <!-- INSTRUCTIONS SECTION -->
+    <div class="card" id="instructionsCard">
+
+        <div class="stepper" aria-label="Exam progress">
+            <span class="step done"><span class="step-num">✓</span>Instructions</span>
+            <span class="step-line"></span>
+            <span class="step done"><span class="step-num">✓</span>Webcam check</span>
+            <span class="step-line"></span>
+            <span class="step active"><span class="step-num">3</span>Examination</span>
+        </div>
+
+        <h2>Ready to begin?</h2>
+        <p class="card-sub">The timer starts as soon as you press Start Exam.</p>
+
+        <div class="exam-info">
+            <p><strong>Exam name</strong> <span id="instructionExamTitle">Examination</span></p>
+            <p><strong>Duration</strong> <span><span id="instructionDuration">60</span> minutes</span></p>
+            <p><strong>Total questions</strong> <span id="instructionQuestions">30</span></p>
+        </div>
+
+        <div class="rule-list">
+            <p>1. Read every question carefully before selecting an answer.</p>
+            <p>2. Select one correct option for each question.</p>
+            <p>3. You can move between questions using Previous and Next.</p>
+            <p>4. Use the question palette to jump directly to a question.</p>
+            <p>5. You can mark questions for review.</p>
+            <p>6. Do not switch tabs during the examination.</p>
+            <p>7. Keep your face visible to the webcam.</p>
+            <p>8. Your exam will be submitted automatically when the timer reaches zero.</p>
+        </div>
+
+        <button class="btn-lg" onclick="startExam()">Start Exam →</button>
+    </div>
+
+    <!-- WEBCAM SECTION -->
+    <div class="card" id="webcamBox">
+        <h2><span class="live-dot"></span>Live Exam Monitoring</h2>
+
+        <div class="webcam-inner">
+            <video id="examCamera" autoplay muted playsinline></video>
+
+            <div class="monitor-lines">
+                <p id="cameraStatus">Camera not started</p>
+                <p id="faceStatus">Face detection waiting...</p>
+                <p id="warningDisplay"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXAM SECTION -->
+    <div class="card" id="examCard">
+
+        <div class="exam-head">
+            <h2 id="examTitle">Examination</h2>
+            <p id="examDetails">Answer all the questions.</p>
+        </div>
+
+        <div id="progress">
+            <div id="progressBar"></div>
+        </div>
+
+        <p id="question"></p>
+
+        <div id="options"></div>
+
+        <div class="question-actions">
+            <button id="reviewButton" onclick="toggleReview()">
+                Mark for Review
+            </button>
+
+            <div class="navigation">
+                <button class="btn-secondary" onclick="previousQuestion()">← Previous</button>
+                <button onclick="nextQuestion()">Next →</button>
+            </div>
+        </div>
+
+        <div class="palette">
+            <div class="palette-head">
+                <h3>Question Palette</h3>
+                <p id="answerCount"></p>
+            </div>
+
+            <div class="palette-legend">
+                <div class="legend-item">
+                    <span class="legend-color answered-color"></span>
+                    Answered
+                </div>
+
+                <div class="legend-item">
+                    <span class="legend-color not-answered-color"></span>
+                    Not Answered
+                </div>
+
+                <div class="legend-item">
+                    <span class="legend-color review-color"></span>
+                    Marked for Review
+                </div>
+            </div>
+
+            <div id="questionPalette"></div>
+        </div>
+
+        <div class="submit-row">
+            <button class="submit-btn btn-lg" onclick="submitExam(false)">Submit Exam</button>
+        </div>
+
+    </div>
+
+    <!-- RESULT SECTION -->
+    <div class="card" id="result">
+
+        <div class="icon-chip green result-icon">
+            <svg class="i i-lg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>
+        </div>
+
+        <h2>Exam Completed!</h2>
+        <p class="card-sub">Your answers have been submitted.</p>
+
+        <div class="result-details">
+            <h3 id="score"></h3>
+            <h3 id="percentage"></h3>
+            <p id="message"></p>
+            <p id="warnings"></p>
+        </div>
+
+        <div class="result-actions">
+            <a class="btn" href="dashboard.html">Back to Dashboard</a>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    // ===============================
+// EXAM DATA
+// ===============================
+
+let selectedExam = null;
+let questions = [];
+
+let currentQuestion = 0;
+let answers = {};
+let markedForReview = {};
+
+let timeLeft = 60 * 60;
+let timerInterval = null;
+
+let examFinished = false;
+let examStarted = false;
+
+let cameraStream = null;
+let warningCount = 0;
+let lookingAwayCount = 0;
+let lastMonitoringState = "";
+
+let faceDetectionInterval = null;
+
+const timerElement = document.getElementById("timer");
+
+
+// ===============================
+// LOAD EXAM FROM LOCAL STORAGE
+// ===============================
+
+const savedExams = JSON.parse(
+    localStorage.getItem("examinations") || "[]"
+);
+
+// The exam the student picked on the dashboard
+const chosenExam = savedExams[
+    Number(sessionStorage.getItem("selectedExamIndex"))
+];
+
+if (
+    chosenExam &&
+    Array.isArray(chosenExam.questions) &&
+    chosenExam.questions.length > 0
+) {
+
+    selectedExam = chosenExam;
+
+    questions = (selectedExam.questions || []).map(q => {
+
+        return {
+            question: q.question,
+            options: [
+                q.optionA,
+                q.optionB,
+                q.optionC,
+                q.optionD
+            ],
+            correctAnswer: "ABCD".indexOf(
+                String(q.correctAnswer || "").toUpperCase()
+            )
+        };
+
+    });
+
+} else {
+
+    // No exam chosen: send the student back to pick one
+    alert("Please choose an examination from your dashboard.");
+    window.location.href = "dashboard.html";
+
+}
+
+
+// ===============================
+// EXAM DETAILS
+// ===============================
+
+const examTitle = selectedExam
+    ? (selectedExam.examName || "Examination")
+    : "Examination";
+
+// Fall back to 60 minutes if the duration is missing or invalid
+const examDuration =
+    selectedExam && Number(selectedExam.duration) > 0
+        ? Number(selectedExam.duration)
+        : 60;
+
+document.getElementById("instructionExamTitle").textContent =
+    examTitle;
+
+document.getElementById("instructionDuration").textContent =
+    examDuration;
+
+document.getElementById("instructionQuestions").textContent =
+    questions.length;
+
+document.getElementById("examTitle").textContent =
+    examTitle;
+
+document.getElementById("examDetails").textContent =
+    "Total Questions: " + questions.length;
+
+
+// ===============================
+// START EXAM
+// ===============================
+
+function startExam() {
+
+    if (questions.length === 0) {
+        alert("No questions available for this examination.");
+        return;
+    }
+
+    examStarted = true;
+
+    document.getElementById("instructionsCard").style.display = "none";
+
+    document.getElementById("webcamBox").style.display = "block";
+
+    document.getElementById("examCard").style.display = "block";
+
+    timeLeft = examDuration * 60;
+
+    displayQuestion();
+
+    startTimer();
+
+    startCamera();
+
+}
+
+
+// ===============================
+// DISPLAY QUESTION
+// ===============================
+
+function displayQuestion() {
+
+    if (currentQuestion < 0 || currentQuestion >= questions.length) {
+        return;
+    }
+
+    const q = questions[currentQuestion];
+
+    document.getElementById("question").textContent =
+        "Question " + (currentQuestion + 1) + ": " + q.question;
+
+    const optionsDiv = document.getElementById("options");
+
+    optionsDiv.innerHTML = "";
+
+    q.options.forEach((option, index) => {
+
+        const label = document.createElement("label");
+
+        label.className = "option";
+
+        const radio = document.createElement("input");
+
+        radio.type = "radio";
+
+        radio.name = "answer";
+
+        radio.value = index;
+
+        radio.checked = answers[currentQuestion] === index;
+
+        radio.addEventListener("change", function () {
+
+            answers[currentQuestion] = index;
+
+            updateQuestionPalette();
+
+        });
+
+        label.appendChild(radio);
+
+        label.appendChild(
+            document.createTextNode(option)
+        );
+
+        optionsDiv.appendChild(label);
+
+    });
+
+    const progress =
+        ((currentQuestion + 1) / questions.length) * 100;
+
+    document.getElementById("progressBar").style.width =
+        progress + "%";
+
+    document.getElementById("reviewButton").textContent =
+        markedForReview[currentQuestion]
+            ? "Remove Review Mark"
+            : "Mark for Review";
+
+    updateQuestionPalette();
+
+}
+
+
+// ===============================
+// QUESTION PALETTE
+// ===============================
+
+function updateQuestionPalette() {
+
+    const palette = document.getElementById("questionPalette");
+
+    palette.innerHTML = "";
+
+    questions.forEach((q, index) => {
+
+        const button = document.createElement("button");
+
+        button.textContent = index + 1;
+
+        button.className = "palette-btn";
+
+        if (answers[index] !== undefined) {
+            button.classList.add("answered");
+        }
+
+        if (markedForReview[index]) {
+            button.classList.add("review");
+        }
+
+        if (index === currentQuestion) {
+            button.classList.add("current");
+        }
+
+        button.addEventListener("click", function () {
+
+            currentQuestion = index;
+
+            displayQuestion();
+
+        });
+
+        palette.appendChild(button);
+
+    });
+
+    const answeredCount = Object.keys(answers).length;
+
+    const reviewCount = Object.keys(markedForReview).filter(
+        key => markedForReview[key]
+    ).length;
+
+    const unansweredCount = questions.length - answeredCount;
+
+    document.getElementById("answerCount").textContent =
+        "Answered: " + answeredCount +
+        " | Unanswered: " + unansweredCount +
+        " | Review: " + reviewCount;
+
+}
+
+
+// ===============================
+// MARK FOR REVIEW
+// ===============================
+
+function toggleReview() {
+
+    markedForReview[currentQuestion] =
+        !markedForReview[currentQuestion];
+
+    displayQuestion();
+
+}
+
+
+// ===============================
+// NEXT QUESTION
+// ===============================
+
+function nextQuestion() {
+
+    if (currentQuestion < questions.length - 1) {
+
+        currentQuestion++;
+
+        displayQuestion();
+
+    } else {
+
+        alert("You are on the last question.");
+
+    }
+
+}
+
+
+// ===============================
+// PREVIOUS QUESTION
+// ===============================
+
+function previousQuestion() {
+
+    if (currentQuestion > 0) {
+
+        currentQuestion--;
+
+        displayQuestion();
+
+    } else {
+
+        alert("You are on the first question.");
+
+    }
+
+}
+
+
+// ===============================
+// WEBCAM START
+// ===============================
+
+async function startCamera() {
+
+    const video = document.getElementById("examCamera");
+
+    const cameraStatus = document.getElementById("cameraStatus");
+
+    try {
+
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false
+        });
+
+        video.srcObject = cameraStream;
+
+        cameraStatus.textContent = "Camera is active";
+
+        cameraStatus.style.color = "green";
+
+        video.addEventListener("loadedmetadata", function () {
+
+            video.play();
+
+        });
+
+        cameraStream.getVideoTracks().forEach(track => {
+
+            track.addEventListener("ended", function () {
+
+                cameraStatus.textContent = "Camera disconnected!";
+
+                cameraStatus.style.color = "red";
+
+                warningCount++;
+
+                updateWarnings();
+
+            });
+
+            track.addEventListener("mute", function () {
+
+                cameraStatus.textContent = "Camera muted";
+
+                warningCount++;
+
+                updateWarnings();
+
+            });
+
+            track.addEventListener("unmute", function () {
+
+                cameraStatus.textContent = "Camera is active";
+
+            });
+
+        });
+
+        loadFaceModels();
+
+    } catch (error) {
+
+        cameraStatus.textContent =
+            "Camera access denied or unavailable.";
+
+        cameraStatus.style.color = "red";
+
+        warningCount++;
+
+        updateWarnings();
+
+    }
+
+}
+
+
+// ===============================
+// LOAD FACE DETECTION MODELS
+// ===============================
+
+async function loadFaceModels() {
+    try {
+        await faceapi.nets.tinyFaceDetector.loadFromUri("./models");
+
+        await faceapi.nets.faceLandmark68Net.loadFromUri("./models");
+
+        document.getElementById("faceStatus").textContent =
+            "Face detection is ready";
+
+        detectExamFace();
+
+    } catch (error) {
+        console.error("Model loading error:", error);
+
+        document.getElementById("faceStatus").textContent =
+            "Face detection models failed to load. Check console.";
+    }
+}
+
+
+// ===============================
+// FACE DETECTION
+// ===============================
+
+async function detectExamFace() {
+
+    const video = document.getElementById("examCamera");
+    const faceStatus = document.getElementById("faceStatus");
+
+    if (examFinished) return;
+
+    try {
+
+        if (video.readyState >= 2) {
+
+            const detections = await faceapi
+                .detectAllFaces(
+                    video,
+                    new faceapi.TinyFaceDetectorOptions()
+                )
+                .withFaceLandmarks();
+
+            let currentState = "";
+
+            if (detections.length === 0) {
+
+                faceStatus.textContent = "No face detected!";
+                faceStatus.style.color = "red";
+
+                currentState = "no-face";
+
+            } else if (detections.length > 1) {
+
+                faceStatus.textContent = "Multiple faces detected!";
+                faceStatus.style.color = "red";
+
+                currentState = "multiple-faces";
+
+            } else {
+
+                const detection = detections[0];
+
+                const box = detection.detection.box;
+                const nose = detection.landmarks.positions[30];
+
+                const faceCenter = box.x + box.width / 2;
+
+                const noseDifference =
+                    Math.abs(nose.x - faceCenter) / box.width;
+
+                if (noseDifference > 0.12) {
+
+                    faceStatus.textContent =
+                        "Warning! Student may be looking away!";
+
+                    faceStatus.style.color = "red";
+
+                    currentState = "looking-away";
+
+                } else {
+
+                    faceStatus.textContent = "1 face detected";
+                    faceStatus.style.color = "green";
+
+                    currentState = "one-face";
+
+                }
+            }
+
+            if (
+                currentState !== "one-face" &&
+                currentState !== lastMonitoringState
+            ) {
+
+                warningCount++;
+                updateWarnings();
+
+            }
+
+            lastMonitoringState = currentState;
+        }
+
+    } catch (error) {
+
+        console.error("Face detection error:", error);
+
+    }
+
+    if (!examFinished) {
+        faceDetectionInterval = setTimeout(detectExamFace, 1000);
+    }
+}
+
+
+// ===============================
+// UPDATE WARNING COUNT
+// ===============================
+
+function updateWarnings() {
+
+    document.getElementById("warningDisplay").textContent =
+        "Monitoring Warnings: " + warningCount;
+
+}
+// ===============================
+// EXAM TIMER
+// ===============================
+
+function startTimer() {
+
+    clearInterval(timerInterval);
+
+    updateTimerDisplay();
+
+    timerInterval = setInterval(function () {
+
+        if (examFinished) {
+            clearInterval(timerInterval);
+            return;
+        }
+
+        timeLeft--;
+
+        updateTimerDisplay();
+
+        if (timeLeft <= 0) {
+
+            clearInterval(timerInterval);
+
+            alert("Time is over! Your exam will be submitted automatically.");
+
+            submitExam(true);
+
+        }
+
+    }, 1000);
+
+}
+
+
+// ===============================
+// UPDATE TIMER DISPLAY
+// ===============================
+
+function updateTimerDisplay() {
+
+    const minutes = Math.floor(timeLeft / 60);
+
+    const seconds = timeLeft % 60;
+
+    timerElement.textContent =
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(seconds).padStart(2, "0");
+
+    if (timeLeft <= 300) {
+
+        timerElement.style.color = "red";
+
+    }
+
+}
+
+
+// ===============================
+// SUBMIT EXAM
+// ===============================
+
+function submitExam(autoSubmit = false) {
+
+    if (examFinished) {
+        return;
+    }
+
+    const unansweredCount =
+        questions.length - Object.keys(answers).length;
+
+    if (!autoSubmit) {
+
+        if (unansweredCount > 0) {
+
+            const confirmUnanswered = confirm(
+                "You have " + unansweredCount +
+                " unanswered questions. Do you want to submit?"
+            );
+
+            if (!confirmUnanswered) {
+                return;
+            }
+
+        } else {
+
+            const confirmSubmit = confirm(
+                "Are you sure you want to submit your exam?"
+            );
+
+            if (!confirmSubmit) {
+                return;
+            }
+
+        }
+
+    }
+
+    examFinished = true;
+
+    clearInterval(timerInterval);
+
+    clearTimeout(faceDetectionInterval);
+
+    // STOP WEBCAM
+
+    if (cameraStream) {
+
+        cameraStream.getTracks().forEach(track => {
+            track.stop();
+        });
+
+    }
+
+    // CALCULATE SCORE
+
+    let score = 0;
+
+    questions.forEach((question, index) => {
+
+        if (answers[index] === question.correctAnswer) {
+
+            score++;
+
+        }
+
+    });
+
+    const totalQuestions = questions.length;
+
+    const percentage =
+        totalQuestions > 0
+            ? ((score / totalQuestions) * 100).toFixed(2)
+            : "0.00";
+
+    // RESULT MESSAGE
+
+    let resultMessage = "";
+
+    if (percentage >= 80) {
+
+        resultMessage = "Excellent performance!";
+
+    } else if (percentage >= 60) {
+
+        resultMessage = "Good job! Keep improving.";
+
+    } else if (percentage >= 40) {
+
+        resultMessage = "You passed. Keep practising.";
+
+    } else {
+
+        resultMessage = "Keep learning and try again.";
+
+    }
+
+    // DISPLAY RESULT
+
+    document.getElementById("instructionsCard").style.display =
+        "none";
+
+    document.getElementById("webcamBox").style.display =
+        "none";
+
+    document.getElementById("examCard").style.display =
+        "none";
+
+    document.getElementById("result").style.display =
+        "block";
+
+    document.getElementById("score").textContent =
+        "Your Score: " + score + " / " + totalQuestions;
+
+    document.getElementById("percentage").textContent =
+        "Percentage: " + percentage + "%";
+
+    document.getElementById("message").textContent =
+        resultMessage;
+
+    document.getElementById("warnings").textContent =
+        "Monitoring Warnings: " + warningCount;
+
+    timerElement.textContent = "Submitted";
+
+    // SAVE EXAM RESULT
+
+    const resultDetails = {
+
+        examName: examTitle,
+
+        score: score,
+
+        totalQuestions: totalQuestions,
+
+        percentage: percentage,
+
+        warnings: warningCount,
+
+        date: new Date().toLocaleString(),
+
+        answers: answers,
+
+        markedForReview: markedForReview
+
+    };
+
+    // SAVE COMPLETED ATTEMPTS
+
+    let completedAttempts = JSON.parse(
+        localStorage.getItem("completedAttempts") || "0"
+    );
+
+    completedAttempts++;
+
+    localStorage.setItem(
+        "completedAttempts",
+        JSON.stringify(completedAttempts)
+    );
+
+    // SAVE EXAM SCORES
+
+    let examScores = JSON.parse(
+        localStorage.getItem("examScores") || "[]"
+    );
+
+    examScores.push(resultDetails);
+
+    localStorage.setItem(
+        "examScores",
+        JSON.stringify(examScores)
+    );
+
+    // SAVE EXAM RESULTS
+
+    let examResults = JSON.parse(
+        localStorage.getItem("examResults") || "[]"
+    );
+
+    examResults.push(resultDetails);
+
+    localStorage.setItem(
+        "examResults",
+        JSON.stringify(examResults)
+    );
+
+    console.log("Exam submitted successfully.");
+
+    console.log("Exam Result:", resultDetails);
+
+}
+
+
+// ===============================
+// TAB SWITCH DETECTION
+// ===============================
+
+document.addEventListener("visibilitychange", function () {
+
+    if (
+        document.hidden &&
+        examStarted &&
+        !examFinished
+    ) {
+
+        warningCount++;
+
+        updateWarnings();
+
+        alert(
+            "Warning! Switching tabs during the examination is not allowed."
+        );
+
+    }
+
+});
+
+
+// ===============================
+// INITIAL PAGE SETUP
+// ===============================
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    timerElement.textContent =
+        String(examDuration).padStart(2, "0") + ":00";
+
+});
+</script>
+</body>
+</html>
